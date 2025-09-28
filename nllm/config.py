@@ -14,7 +14,7 @@ from .constants import (
     DEFAULT_STREAM,
     DEFAULT_TIMEOUT,
 )
-from .models import NllmConfig
+from .models import ModelConfig, NllmConfig
 from .utils import ConfigError
 
 
@@ -94,14 +94,17 @@ def validate_config(config: NllmConfig) -> None:
 
 def create_example_config() -> str:
     """Create an example configuration file content."""
-    return """# Prompter configuration file
+    return """# nllm configuration file
 # This file configures default behavior for the nllm CLI
 
 # List of models to use if none specified on command line
+# Supports both simple string format and per-model options
 models:
-  - "gpt-4"
-  - "claude-3-sonnet"
-  - "gemini-pro"
+  - "gpt-4"  # Simple format
+  - name: "claude-3-sonnet"  # With per-model options
+    options: ["-o", "temperature", "0.2", "--system", "You are concise"]
+  - name: "gemini-pro"
+    options: ["-o", "temperature", "0.8"]
 
 # Default settings
 defaults:
@@ -122,15 +125,59 @@ defaults:
 """
 
 
-def resolve_models(cli_models: list[str] | None, config: NllmConfig) -> list[str]:
+def parse_cli_model_options(model_options: list[str]) -> dict[str, list[str]]:
+    """Parse CLI model options from --model-option flags.
+
+    Format: model_name:option1:option2:...
+    Returns dict mapping model names to their option lists.
+    """
+    result = {}
+    for option_spec in model_options:
+        if ":" not in option_spec:
+            raise ConfigError(f"Invalid model option format: {option_spec}. Expected format: model:option1:option2:...")
+
+        parts = option_spec.split(":")
+        model_name = parts[0]
+        options = parts[1:] if len(parts) > 1 else []
+
+        if model_name in result:
+            result[model_name].extend(options)
+        else:
+            result[model_name] = options
+
+    return result
+
+
+def resolve_models(cli_models: list[str] | None, cli_model_options: list[str], config: NllmConfig) -> list[ModelConfig]:
     """Resolve final model list from CLI args and config."""
+    # Parse CLI model options
+    cli_options_map = parse_cli_model_options(cli_model_options)
+
     # CLI models override config models (including empty list)
     if cli_models is not None:
-        return cli_models
+        result = []
+        for model_name in cli_models:
+            options = cli_options_map.get(model_name, [])
+            result.append(ModelConfig(name=model_name, options=options))
+        return result
 
-    # Use config models
+    # Use config models, but merge in CLI options
     if config.models:
-        return config.models
+        result = []
+        for model_config in config.models:
+            # Start with config options
+            merged_options = model_config.options.copy()
+            # Add CLI options if any
+            if model_config.name in cli_options_map:
+                merged_options.extend(cli_options_map[model_config.name])
+
+            result.append(ModelConfig(name=model_config.name, options=merged_options))
+        return result
+
+    # No models specified in config, but CLI options might reference models
+    if cli_options_map:
+        return [ModelConfig(name=model_name, options=options)
+                for model_name, options in cli_options_map.items()]
 
     # No models specified anywhere
     return []
@@ -139,6 +186,7 @@ def resolve_models(cli_models: list[str] | None, config: NllmConfig) -> list[str
 def merge_cli_config(
     config: NllmConfig,
     cli_models: list[str] | None = None,
+    cli_model_options: list[str] | None = None,
     cli_parallel: int | None = None,
     cli_timeout: int | None = None,
     cli_retries: int | None = None,
@@ -146,8 +194,11 @@ def merge_cli_config(
     cli_outdir: str | None = None,
 ) -> NllmConfig:
     """Merge CLI arguments into configuration."""
+    # Resolve models with per-model options
+    resolved_models = resolve_models(cli_models, cli_model_options or [], config)
+
     return config.merge_cli_args(
-        models=cli_models,
+        models=resolved_models,
         parallel=cli_parallel,
         timeout=cli_timeout,
         retries=cli_retries,

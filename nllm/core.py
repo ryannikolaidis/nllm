@@ -21,7 +21,7 @@ from .constants import (
     STATUS_SUCCESS,
     STATUS_TIMEOUT,
 )
-from .models import ExecutionContext, ModelResult
+from .models import ExecutionContext, ModelConfig, ModelResult
 from .utils import (
     ExecutionError,
     classify_error,
@@ -38,13 +38,18 @@ from .utils import (
 class ModelExecutor:
     """Handles execution of a single model."""
 
-    def __init__(self, model: str, context: ExecutionContext, console: Console, suppress_streaming: bool = False):
-        self.model = model
+    def __init__(self, model_config: ModelConfig, context: ExecutionContext, console: Console, suppress_streaming: bool = False):
+        self.model_config = model_config
         self.context = context
         self.console = console
         self.suppress_streaming = suppress_streaming
         self.start_time: float | None = None
         self.end_time: float | None = None
+
+    @property
+    def model(self) -> str:
+        """Get the model name for backward compatibility."""
+        return self.model_config.name
 
     async def execute(self) -> ModelResult:
         """Execute the model and return results."""
@@ -80,7 +85,7 @@ class ModelExecutor:
 
     def _create_dry_run_result(self) -> ModelResult:
         """Create a result for dry run mode."""
-        command = construct_llm_command(self.model, self.context.llm_args)
+        command = construct_llm_command(self.model_config.name, self.context.llm_args, self.model_config.options)
         command_str = " ".join(redact_secrets_from_args(command))
 
         if not self.context.quiet:
@@ -98,7 +103,7 @@ class ModelExecutor:
 
     async def _run_model(self) -> ModelResult:
         """Run the actual model execution."""
-        command = construct_llm_command(self.model, self.context.llm_args)
+        command = construct_llm_command(self.model_config.name, self.context.llm_args, self.model_config.options)
 
         # Create process
         try:
@@ -219,7 +224,7 @@ class ModelExecutor:
     def _create_timeout_result(self) -> ModelResult:
         """Create result for timeout case."""
         duration_ms = int((self.end_time or time.time()) - (self.start_time or 0)) * 1000
-        command = construct_llm_command(self.model, self.context.llm_args)
+        command = construct_llm_command(self.model_config.name, self.context.llm_args, self.model_config.options)
 
         return ModelResult(
             model=self.model,
@@ -235,7 +240,7 @@ class ModelExecutor:
     def _create_error_result(self, error_message: str) -> ModelResult:
         """Create result for error case."""
         duration_ms = int((self.end_time or time.time()) - (self.start_time or 0)) * 1000
-        command = construct_llm_command(self.model, self.context.llm_args)
+        command = construct_llm_command(self.model_config.name, self.context.llm_args, self.model_config.options)
 
         return ModelResult(
             model=self.model,
@@ -295,14 +300,14 @@ class NllmExecutor:
         # Create semaphore for concurrency control
         semaphore = asyncio.Semaphore(self.context.config.parallel)
 
-        async def run_single_model(model: str) -> ModelResult:
+        async def run_single_model(model_config: ModelConfig) -> ModelResult:
             async with semaphore:
-                executor = ModelExecutor(model, self.context, self.console)
+                executor = ModelExecutor(model_config, self.context, self.console)
                 return await executor.execute()
 
         # Initialize status for all models
-        for model in models:
-            self.model_status[model] = {
+        for model_config in models:
+            self.model_status[model_config.name] = {
                 "status": "running",
                 "duration": "",
                 "result_file": ""
@@ -349,28 +354,28 @@ class NllmExecutor:
 
         return table
 
-    async def _run_single_model_with_progress(self, model: str, live, semaphore, update_lock) -> ModelResult:
+    async def _run_single_model_with_progress(self, model_config: ModelConfig, live, semaphore, update_lock) -> ModelResult:
         """Run a single model and update progress table."""
         async with semaphore:
-            executor = ModelExecutor(model, self.context, self.console, suppress_streaming=True)
+            executor = ModelExecutor(model_config, self.context, self.console, suppress_streaming=True)
             result = await executor.execute()
 
             # Update status based on result (with lock to prevent concurrent updates)
             async with update_lock:
                 if result.status == "ok":
-                    self.model_status[model] = {
+                    self.model_status[model_config.name] = {
                         "status": "completed",
                         "duration": format_duration(result.duration_ms),
-                        "result_file": f"results/{sanitize_filename(model)}.json"
+                        "result_file": f"results/{sanitize_filename(model_config.name)}.json"
                     }
                 elif result.status == "timeout":
-                    self.model_status[model] = {
+                    self.model_status[model_config.name] = {
                         "status": "timeout",
                         "duration": format_duration(result.duration_ms),
                         "result_file": ""
                     }
                 else:
-                    self.model_status[model] = {
+                    self.model_status[model_config.name] = {
                         "status": "error",
                         "duration": format_duration(result.duration_ms),
                         "result_file": ""

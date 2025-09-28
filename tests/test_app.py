@@ -17,9 +17,9 @@ class TestRunNllm:
     ):
         """Test successful nllm run."""
         # Mock config loading
-        from nllm.models import NllmConfig
+        from nllm.models import ModelConfig, NllmConfig
 
-        config = NllmConfig(models=["gpt-4"])
+        config = NllmConfig(models=[ModelConfig(name="gpt-4", options=[])])
         mock_load_config.return_value = (config, [])
 
         # Mock llm availability
@@ -49,39 +49,42 @@ class TestRunNllm:
     @patch("nllm.app.load_config")
     def test_run_no_models(self, mock_load_config):
         """Test nllm run with no models specified."""
-        from nllm.models import NllmConfig
+        from nllm.models import ModelConfig, NllmConfig
+        from nllm.utils import ConfigError
+        import pytest
 
         config = NllmConfig(models=[])
         mock_load_config.return_value = (config, [])
 
-        exit_code = run(quiet=True)
-
-        assert exit_code == 1
+        with pytest.raises(ConfigError):
+            run(quiet=True)
 
     @patch("nllm.app.check_llm_available")
     @patch("nllm.app.load_config")
     def test_run_llm_not_available(self, mock_load_config, mock_check_llm):
         """Test nllm run when llm command not available."""
-        from nllm.models import NllmConfig
+        from nllm.models import ModelConfig, NllmConfig
 
-        config = NllmConfig(models=["gpt-4"])
+        config = NllmConfig(models=[ModelConfig(name="gpt-4", options=[])])
         mock_load_config.return_value = (config, [])
 
         # Mock llm not available
         mock_check_llm.return_value = (False, None)
 
-        exit_code = run(cli_models=["gpt-4"], quiet=True)
+        from nllm.utils import ExecutionError
+        import pytest
 
-        assert exit_code == 1
+        with pytest.raises(ExecutionError):
+            run(cli_models=["gpt-4"], quiet=True)
 
     @patch("nllm.app.check_llm_available")
     @patch("nllm.app.load_config")
     @patch("nllm.app.asyncio.run")
     def test_run_dry_run(self, mock_asyncio_run, mock_load_config, mock_check_llm):
         """Test nllm dry run mode."""
-        from nllm.models import NllmConfig
+        from nllm.models import ModelConfig, NllmConfig
 
-        config = NllmConfig(models=["gpt-4"])
+        config = NllmConfig(models=[ModelConfig(name="gpt-4", options=[])])
         mock_load_config.return_value = (config, [])
 
         # Should not check llm availability in dry run
@@ -89,18 +92,19 @@ class TestRunNllm:
             mock_executor = Mock()
             mock_executor.execute_all.return_value = []
             mock_executor.get_exit_code.return_value = 0
+            mock_executor.results = []  # Add results attribute
             mock_executor_class.return_value = mock_executor
 
             # Mock asyncio.run
             mock_asyncio_run.return_value = []
 
-            exit_code = run(
+            results = run(
                 cli_models=["gpt-4"],
                 dry_run=True,
                 llm_args=["test"],
             )
 
-            assert exit_code == 0
+            assert results.exit_code == 0
             # Should not check llm in dry run
             mock_check_llm.assert_not_called()
             mock_asyncio_run.assert_called_once()
@@ -112,9 +116,9 @@ class TestRunNllm:
 
         mock_load_config.side_effect = ConfigError("Invalid config")
 
-        exit_code = run(quiet=True)
-
-        assert exit_code == 1
+        import pytest
+        with pytest.raises(ConfigError):
+            run(quiet=True)
 
     @patch("nllm.app.check_llm_available")
     @patch("nllm.app.NllmExecutor")
@@ -123,10 +127,10 @@ class TestRunNllm:
         self, mock_load_config, mock_executor_class, mock_check_llm
     ):
         """Test nllm run with execution error."""
-        from nllm.models import NllmConfig
+        from nllm.models import ModelConfig, NllmConfig
         from nllm.utils import ExecutionError
 
-        config = NllmConfig(models=["gpt-4"])
+        config = NllmConfig(models=[ModelConfig(name="gpt-4", options=[])])
         mock_load_config.return_value = (config, [])
         mock_check_llm.return_value = (True, "0.10.0")
 
@@ -135,9 +139,9 @@ class TestRunNllm:
         mock_executor.execute_all.side_effect = ExecutionError("Execution failed")
         mock_executor_class.return_value = mock_executor
 
-        exit_code = run(cli_models=["gpt-4"], quiet=True)
-
-        assert exit_code == 1
+        import pytest
+        with pytest.raises(ExecutionError):
+            run(cli_models=["gpt-4"], quiet=True)
 
     @patch("nllm.app.check_llm_available")
     @patch("nllm.app.NllmExecutor")
@@ -146,9 +150,9 @@ class TestRunNllm:
         self, mock_load_config, mock_executor_class, mock_check_llm
     ):
         """Test nllm run with keyboard interrupt."""
-        from nllm.models import NllmConfig
+        from nllm.models import ModelConfig, NllmConfig
 
-        config = NllmConfig(models=["gpt-4"])
+        config = NllmConfig(models=[ModelConfig(name="gpt-4", options=[])])
         mock_load_config.return_value = (config, [])
         mock_check_llm.return_value = (True, "0.10.0")
 
@@ -169,7 +173,7 @@ class TestRunNllm:
             patch("nllm.app.NllmExecutor") as mock_executor_class,
             patch("nllm.app.asyncio.run") as mock_asyncio_run,
         ):
-            from nllm.models import NllmConfig
+            from nllm.models import ModelConfig, NllmConfig
 
             config = NllmConfig()
             mock_load_config.return_value = (config, [])
@@ -216,6 +220,7 @@ class TestBuildCliArgs:
         """Test building CLI args with minimal options."""
         args = _build_cli_args(
             cli_models=None,
+            cli_model_options=None,
             config_path=None,
             outdir=None,
             parallel=None,
@@ -234,6 +239,7 @@ class TestBuildCliArgs:
         """Test building CLI args with models."""
         args = _build_cli_args(
             cli_models=["gpt-4", "claude-3-sonnet"],
+            cli_model_options=None,
             config_path=None,
             outdir=None,
             parallel=None,
@@ -293,6 +299,7 @@ class TestBuildCliArgs:
         """Test building CLI args with stream disabled."""
         args = _build_cli_args(
             cli_models=None,
+            cli_model_options=None,
             config_path=None,
             outdir=None,
             parallel=None,
@@ -312,6 +319,7 @@ class TestBuildCliArgs:
         """Test building CLI args with only llm arguments."""
         args = _build_cli_args(
             cli_models=None,
+            cli_model_options=None,
             config_path=None,
             outdir=None,
             parallel=None,

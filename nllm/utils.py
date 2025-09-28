@@ -114,8 +114,8 @@ def create_timestamped_dir(base_dir: str) -> Path:
     return output_dir
 
 
-def construct_llm_command(model: str, llm_args: list[str]) -> list[str]:
-    """Construct llm command for a specific model."""
+def construct_llm_command(model: str, llm_args: list[str], model_options: list[str] | None = None) -> list[str]:
+    """Construct llm command for a specific model with per-model options."""
     command = ["llm"]
 
     # If model is already specified in llm_args, don't add it again
@@ -127,6 +127,10 @@ def construct_llm_command(model: str, llm_args: list[str]) -> list[str]:
 
     if not has_model:
         command.extend(["-m", model])
+
+    # Add model-specific options before global llm_args
+    if model_options:
+        command.extend(model_options)
 
     command.extend(llm_args)
     return command

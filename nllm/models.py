@@ -120,10 +120,33 @@ class RunManifest:
 
 
 @dataclass
+class ModelConfig:
+    """Configuration for a single model."""
+
+    name: str
+    options: list[str] = field(default_factory=list)
+
+    @classmethod
+    def from_string(cls, model_str: str) -> ModelConfig:
+        """Create ModelConfig from a simple string."""
+        return cls(name=model_str, options=[])
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> ModelConfig:
+        """Create ModelConfig from dictionary."""
+        if "name" not in data:
+            raise ValueError("Model config must have 'name' field")
+        return cls(
+            name=data["name"],
+            options=data.get("options", [])
+        )
+
+
+@dataclass
 class NllmConfig:
     """Configuration for nllm runs."""
 
-    models: list[str] = field(default_factory=list)
+    models: list[ModelConfig] = field(default_factory=list)
     parallel: int = 4
     timeout: int = 120
     retries: int = 0
@@ -131,11 +154,33 @@ class NllmConfig:
     outdir: str = "./nllm-runs"
     costs: dict[str, dict[str, float]] = field(default_factory=dict)
 
+    def get_model_names(self) -> list[str]:
+        """Get list of model names."""
+        return [model.name for model in self.models]
+
+    def get_model_config(self, model_name: str) -> ModelConfig | None:
+        """Get configuration for a specific model."""
+        for model in self.models:
+            if model.name == model_name:
+                return model
+        return None
+
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> NllmConfig:
         """Create config from dictionary (loaded from YAML)."""
+        # Parse models - support both string and dict formats
+        raw_models = data.get("models", [])
+        models = []
+        for item in raw_models:
+            if isinstance(item, str):
+                models.append(ModelConfig.from_string(item))
+            elif isinstance(item, dict):
+                models.append(ModelConfig.from_dict(item))
+            else:
+                raise ValueError(f"Invalid model configuration: {item}")
+
         return cls(
-            models=data.get("models", []),
+            models=models,
             parallel=data.get("defaults", {}).get("parallel", 4),
             timeout=data.get("defaults", {}).get("timeout", 120),
             retries=data.get("defaults", {}).get("retries", 0),
@@ -146,7 +191,7 @@ class NllmConfig:
 
     def merge_cli_args(
         self,
-        models: list[str] | None = None,
+        models: list[ModelConfig] | None = None,
         parallel: int | None = None,
         timeout: int | None = None,
         retries: int | None = None,

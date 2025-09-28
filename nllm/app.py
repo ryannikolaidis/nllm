@@ -6,7 +6,7 @@ import asyncio
 import tempfile
 from pathlib import Path
 
-from .config import load_config, merge_cli_config, resolve_models, validate_config
+from .config import load_config, merge_cli_config, validate_config
 from .constants import ERROR_LLM_NOT_FOUND, ERROR_NO_MODELS
 from .core import NllmExecutor
 from .models import ExecutionContext, NllmResults, RunManifest
@@ -22,6 +22,7 @@ from .utils import (
 
 def run(
     cli_models: list[str] | None = None,
+    cli_model_options: list[str] | None = None,
     config_path: str | None = None,
     outdir: str | None = None,
     parallel: int | None = None,
@@ -40,15 +41,18 @@ def run(
     """
     if llm_args is None:
         llm_args = []
+    if cli_model_options is None:
+        cli_model_options = []
 
     try:
         # Load configuration
         config, config_files_used = load_config(config_path)
 
-        # Merge CLI arguments
+        # Merge CLI arguments (this resolves models with per-model options)
         config = merge_cli_config(
             config,
             cli_models=cli_models,
+            cli_model_options=cli_model_options,
             cli_parallel=parallel,
             cli_timeout=timeout,
             cli_retries=retries,
@@ -59,12 +63,9 @@ def run(
         # Validate configuration
         validate_config(config)
 
-        # Resolve final model list
-        final_models = resolve_models(cli_models, config)
-        if not final_models:
+        # Check we have models
+        if not config.models:
             raise ConfigError(ERROR_NO_MODELS)
-
-        config.models = final_models
 
         # Check llm availability (unless dry run)
         if not dry_run:
@@ -91,6 +92,7 @@ def run(
         manifest = RunManifest.create(
             cli_args=_build_cli_args(
                 cli_models,
+                cli_model_options,
                 config_path,
                 outdir,
                 parallel,
@@ -102,7 +104,7 @@ def run(
                 quiet,
                 llm_args,
             ),
-            resolved_models=final_models,
+            resolved_models=config.get_model_names(),
             config_paths_used=config_files_used,
             git_sha=git_sha,
             llm_version=llm_version,
@@ -157,6 +159,7 @@ def run(
 
 def _build_cli_args(
     cli_models: list[str] | None,
+    cli_model_options: list[str] | None,
     config_path: str | None,
     outdir: str | None,
     parallel: int | None,
@@ -174,6 +177,10 @@ def _build_cli_args(
     if cli_models:
         for model in cli_models:
             args.extend(["-m", model])
+
+    if cli_model_options:
+        for option in cli_model_options:
+            args.extend(["--model-option", option])
 
     if config_path:
         args.extend(["-c", config_path])

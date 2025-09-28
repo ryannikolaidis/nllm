@@ -21,6 +21,9 @@ from .constants import (
     TIMEOUT_HELP,
 )
 
+# Help text for new model options flag
+MODEL_OPTION_HELP = "Per-model options in format model:option1:option2:... (repeatable)"
+
 console = Console()
 
 
@@ -33,6 +36,7 @@ def version_callback(value: bool):
 
 def main(
     models: list[str] | None = typer.Option(None, "-m", "--model", help=MODEL_HELP),
+    model_options: list[str] | None = typer.Option(None, "--model-option", help=MODEL_OPTION_HELP),
     config_path: str | None = typer.Option(None, "-c", "--config", help=CONFIG_HELP),
     outdir: str | None = typer.Option(None, "-o", "--outdir", help=OUTDIR_HELP),
     parallel: int | None = typer.Option(None, "--parallel", help=PARALLEL_HELP),
@@ -57,7 +61,8 @@ def main(
 
     Examples:
       nllm -m gpt-4 -m claude-3-sonnet -- "Explain quantum computing"
-      nllm -- -m gpt-4 -t 0.2 --system "You are helpful" "Write a haiku"
+      nllm --model-option gpt-4:-o:temperature:0.7 -- "Write a haiku"
+      nllm -m gpt-4 --model-option gpt-4:--system:"You are concise" -- "Summarize quantum computing"
       nllm -c my-config.yaml -- "What is the capital of France?"
     """
     # Convert llm_args from None to empty list if needed
@@ -68,6 +73,7 @@ def main(
     try:
         results = run(
             cli_models=models,
+            cli_model_options=model_options or [],
             config_path=config_path,
             outdir=outdir,
             parallel=parallel,
