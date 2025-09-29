@@ -454,7 +454,7 @@ class NllmExecutor:
             message = f"⚠ {success_count} of {total_count} models completed successfully"
             style = "yellow"
 
-        if not self.context.dry_run:
+        if not self.context.dry_run and not self.context.using_temp_dir:
             artifacts_msg = f"Artifacts saved to: {self.context.output_dir}"
             panel_content = f"{message}\n{artifacts_msg}"
         else:

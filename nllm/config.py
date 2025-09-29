@@ -112,7 +112,7 @@ defaults:
   timeout: 120         # Per-model timeout in seconds
   retries: 0          # Per-model retries for transient errors
   stream: true        # Stream outputs to console
-  outdir: "./nllm-runs"  # Base output directory
+  outdir: "./nllm-out"  # Base output directory
 
 # Optional: Cost tracking per model (estimates)
 # costs:

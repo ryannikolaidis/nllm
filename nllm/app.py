@@ -78,12 +78,16 @@ def run(
         # Create output directory
         temp_dir_cleanup = None
         if not dry_run:
-            if outdir is None:
+            if outdir is not None:
+                # Use CLI-specified output directory
+                output_dir = create_timestamped_dir(outdir)
+            elif config.outdir:
+                # Use config-specified output directory
+                output_dir = create_timestamped_dir(config.outdir)
+            else:
                 # Use temporary directory that will be cleaned up
                 temp_dir_cleanup = tempfile.TemporaryDirectory()
                 output_dir = Path(temp_dir_cleanup.name)
-            else:
-                output_dir = create_timestamped_dir(config.outdir)
         else:
             output_dir = Path("/tmp")  # Dummy path for dry runs
 
@@ -120,6 +124,7 @@ def run(
                 quiet=quiet,
                 dry_run=dry_run,
                 raw_output=raw,
+                using_temp_dir=temp_dir_cleanup is not None,
             )
 
             # Execute

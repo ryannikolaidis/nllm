@@ -220,6 +220,7 @@ class ExecutionContext:
     quiet: bool = False
     dry_run: bool = False
     raw_output: bool = False
+    using_temp_dir: bool = False
 
     def get_model_output_paths(self, model: str) -> tuple[Path, Path]:
         """Get stdout and stderr output paths for a model."""
