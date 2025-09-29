@@ -1,0 +1,477 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>nllm.models &mdash; nllm 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            nllm
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../installation.html#from-source">From Source</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation.html#development-installation">Development Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation.html#requirements">Requirements</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../usage.html#command-line">Command Line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage.html#python-api">Python API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../api.html#module-nllm">nllm module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api.html#nllm.run"><code class="docutils literal notranslate"><span class="pre">run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api.html#nllm.ExecutionContext"><code class="docutils literal notranslate"><span class="pre">ExecutionContext</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.ExecutionContext.__init__"><code class="docutils literal notranslate"><span class="pre">ExecutionContext.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.ExecutionContext.dry_run"><code class="docutils literal notranslate"><span class="pre">ExecutionContext.dry_run</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.ExecutionContext.get_model_output_paths"><code class="docutils literal notranslate"><span class="pre">ExecutionContext.get_model_output_paths()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.ExecutionContext.get_results_dir"><code class="docutils literal notranslate"><span class="pre">ExecutionContext.get_results_dir()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.ExecutionContext.quiet"><code class="docutils literal notranslate"><span class="pre">ExecutionContext.quiet</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.ExecutionContext.raw_output"><code class="docutils literal notranslate"><span class="pre">ExecutionContext.raw_output</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.ExecutionContext.using_temp_dir"><code class="docutils literal notranslate"><span class="pre">ExecutionContext.using_temp_dir</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.ExecutionContext.config"><code class="docutils literal notranslate"><span class="pre">ExecutionContext.config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.ExecutionContext.llm_args"><code class="docutils literal notranslate"><span class="pre">ExecutionContext.llm_args</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.ExecutionContext.output_dir"><code class="docutils literal notranslate"><span class="pre">ExecutionContext.output_dir</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.ExecutionContext.manifest"><code class="docutils literal notranslate"><span class="pre">ExecutionContext.manifest</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api.html#nllm.ModelResult"><code class="docutils literal notranslate"><span class="pre">ModelResult</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.ModelResult.__init__"><code class="docutils literal notranslate"><span class="pre">ModelResult.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.ModelResult.json"><code class="docutils literal notranslate"><span class="pre">ModelResult.json</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.ModelResult.stderr_tail"><code class="docutils literal notranslate"><span class="pre">ModelResult.stderr_tail</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.ModelResult.to_dict"><code class="docutils literal notranslate"><span class="pre">ModelResult.to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.ModelResult.model"><code class="docutils literal notranslate"><span class="pre">ModelResult.model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.ModelResult.status"><code class="docutils literal notranslate"><span class="pre">ModelResult.status</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.ModelResult.duration_ms"><code class="docutils literal notranslate"><span class="pre">ModelResult.duration_ms</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.ModelResult.exit_code"><code class="docutils literal notranslate"><span class="pre">ModelResult.exit_code</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.ModelResult.text"><code class="docutils literal notranslate"><span class="pre">ModelResult.text</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.ModelResult.meta"><code class="docutils literal notranslate"><span class="pre">ModelResult.meta</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.ModelResult.command"><code class="docutils literal notranslate"><span class="pre">ModelResult.command</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api.html#nllm.NllmConfig"><code class="docutils literal notranslate"><span class="pre">NllmConfig</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.NllmConfig.__init__"><code class="docutils literal notranslate"><span class="pre">NllmConfig.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.NllmConfig.from_dict"><code class="docutils literal notranslate"><span class="pre">NllmConfig.from_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.NllmConfig.get_model_config"><code class="docutils literal notranslate"><span class="pre">NllmConfig.get_model_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.NllmConfig.get_model_names"><code class="docutils literal notranslate"><span class="pre">NllmConfig.get_model_names()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.NllmConfig.merge_cli_args"><code class="docutils literal notranslate"><span class="pre">NllmConfig.merge_cli_args()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.NllmConfig.outdir"><code class="docutils literal notranslate"><span class="pre">NllmConfig.outdir</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.NllmConfig.retries"><code class="docutils literal notranslate"><span class="pre">NllmConfig.retries</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.NllmConfig.stream"><code class="docutils literal notranslate"><span class="pre">NllmConfig.stream</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.NllmConfig.timeout"><code class="docutils literal notranslate"><span class="pre">NllmConfig.timeout</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.NllmConfig.models"><code class="docutils literal notranslate"><span class="pre">NllmConfig.models</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.NllmConfig.costs"><code class="docutils literal notranslate"><span class="pre">NllmConfig.costs</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api.html#nllm.NllmResults"><code class="docutils literal notranslate"><span class="pre">NllmResults</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.NllmResults.__init__"><code class="docutils literal notranslate"><span class="pre">NllmResults.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.NllmResults.failed_models"><code class="docutils literal notranslate"><span class="pre">NllmResults.failed_models</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.NllmResults.get_result"><code class="docutils literal notranslate"><span class="pre">NllmResults.get_result()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.NllmResults.success"><code class="docutils literal notranslate"><span class="pre">NllmResults.success</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.NllmResults.successful_models"><code class="docutils literal notranslate"><span class="pre">NllmResults.successful_models</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.NllmResults.results"><code class="docutils literal notranslate"><span class="pre">NllmResults.results</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.NllmResults.manifest"><code class="docutils literal notranslate"><span class="pre">NllmResults.manifest</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.NllmResults.success_count"><code class="docutils literal notranslate"><span class="pre">NllmResults.success_count</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.NllmResults.total_count"><code class="docutils literal notranslate"><span class="pre">NllmResults.total_count</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.NllmResults.exit_code"><code class="docutils literal notranslate"><span class="pre">NllmResults.exit_code</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api.html#nllm.RunManifest"><code class="docutils literal notranslate"><span class="pre">RunManifest</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.RunManifest.__init__"><code class="docutils literal notranslate"><span class="pre">RunManifest.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.RunManifest.create"><code class="docutils literal notranslate"><span class="pre">RunManifest.create()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.RunManifest.git_sha"><code class="docutils literal notranslate"><span class="pre">RunManifest.git_sha</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.RunManifest.llm_version"><code class="docutils literal notranslate"><span class="pre">RunManifest.llm_version</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.RunManifest.to_dict"><code class="docutils literal notranslate"><span class="pre">RunManifest.to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.RunManifest.cli_args"><code class="docutils literal notranslate"><span class="pre">RunManifest.cli_args</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.RunManifest.resolved_models"><code class="docutils literal notranslate"><span class="pre">RunManifest.resolved_models</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.RunManifest.timestamp"><code class="docutils literal notranslate"><span class="pre">RunManifest.timestamp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.RunManifest.hostname"><code class="docutils literal notranslate"><span class="pre">RunManifest.hostname</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.RunManifest.config_paths_used"><code class="docutils literal notranslate"><span class="pre">RunManifest.config_paths_used</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.RunManifest.os_info"><code class="docutils literal notranslate"><span class="pre">RunManifest.os_info</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api.html#nllm.RunManifest.working_directory"><code class="docutils literal notranslate"><span class="pre">RunManifest.working_directory</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api.html#module-nllm.cli">nllm.cli module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api.html#nllm.cli.version_callback"><code class="docutils literal notranslate"><span class="pre">version_callback()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api.html#nllm.cli.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api.html#nllm.cli.cli_main"><code class="docutils literal notranslate"><span class="pre">cli_main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api.html#module-nllm.app">nllm.app module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api.html#nllm.app.run"><code class="docutils literal notranslate"><span class="pre">run()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">nllm</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">nllm.models</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for nllm.models</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Data models for nllm results and manifest.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">platform</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">socket</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span>
+
+
+<div class="viewcode-block" id="ModelResult">
+<a class="viewcode-back" href="../../api.html#nllm.ModelResult">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ModelResult</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Result from running a single model.&quot;&quot;&quot;</span>
+
+    <span class="n">model</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">status</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;ok&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;timeout&quot;</span><span class="p">]</span>
+    <span class="n">duration_ms</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">exit_code</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">meta</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">command</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">stderr_tail</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">json</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="ModelResult.to_dict">
+<a class="viewcode-back" href="../../api.html#nllm.ModelResult.to_dict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert to dictionary for JSON serialization.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
+            <span class="s2">&quot;duration_ms&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration_ms</span><span class="p">,</span>
+            <span class="s2">&quot;exit_code&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">exit_code</span><span class="p">,</span>
+            <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+            <span class="s2">&quot;meta&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="p">,</span>
+            <span class="s2">&quot;command&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">command</span><span class="p">,</span>
+            <span class="s2">&quot;stderr_tail&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">stderr_tail</span><span class="p">,</span>
+            <span class="s2">&quot;json&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">json</span><span class="p">,</span>
+        <span class="p">}</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="NllmResults">
+<a class="viewcode-back" href="../../api.html#nllm.NllmResults">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NllmResults</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Results returned from the Python API.&quot;&quot;&quot;</span>
+
+    <span class="n">results</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ModelResult</span><span class="p">]</span>
+    <span class="n">manifest</span><span class="p">:</span> <span class="n">RunManifest</span>
+    <span class="n">success_count</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">total_count</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">exit_code</span><span class="p">:</span> <span class="nb">int</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">success</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether all models completed successfully.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">exit_code</span> <span class="o">==</span> <span class="mi">0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">failed_models</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;List of models that failed or timed out.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">model</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;timeout&quot;</span><span class="p">)]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">successful_models</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;List of models that completed successfully.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">model</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;ok&quot;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="NllmResults.get_result">
+<a class="viewcode-back" href="../../api.html#nllm.NllmResults.get_result">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ModelResult</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get result for a specific model.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">model</span> <span class="o">==</span> <span class="n">model</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">result</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="RunManifest">
+<a class="viewcode-back" href="../../api.html#nllm.RunManifest">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RunManifest</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Manifest for a complete nllm run.&quot;&quot;&quot;</span>
+
+    <span class="n">cli_args</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">resolved_models</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">hostname</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">git_sha</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">config_paths_used</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">llm_version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">os_info</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">platform</span><span class="o">.</span><span class="n">platform</span><span class="p">())</span>
+    <span class="n">working_directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()))</span>
+
+<div class="viewcode-block" id="RunManifest.create">
+<a class="viewcode-back" href="../../api.html#nllm.RunManifest.create">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">cli_args</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">resolved_models</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">config_paths_used</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">git_sha</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">llm_version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RunManifest</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new manifest with current system info.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">cli_args</span><span class="o">=</span><span class="n">cli_args</span><span class="p">,</span>
+            <span class="n">resolved_models</span><span class="o">=</span><span class="n">resolved_models</span><span class="p">,</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
+            <span class="n">hostname</span><span class="o">=</span><span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">(),</span>
+            <span class="n">git_sha</span><span class="o">=</span><span class="n">git_sha</span><span class="p">,</span>
+            <span class="n">config_paths_used</span><span class="o">=</span><span class="n">config_paths_used</span><span class="p">,</span>
+            <span class="n">llm_version</span><span class="o">=</span><span class="n">llm_version</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RunManifest.to_dict">
+<a class="viewcode-back" href="../../api.html#nllm.RunManifest.to_dict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert to dictionary for JSON serialization.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;cli_args&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cli_args</span><span class="p">,</span>
+            <span class="s2">&quot;resolved_models&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolved_models</span><span class="p">,</span>
+            <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span><span class="p">,</span>
+            <span class="s2">&quot;hostname&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">hostname</span><span class="p">,</span>
+            <span class="s2">&quot;git_sha&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">git_sha</span><span class="p">,</span>
+            <span class="s2">&quot;config_paths_used&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_paths_used</span><span class="p">,</span>
+            <span class="s2">&quot;llm_version&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">llm_version</span><span class="p">,</span>
+            <span class="s2">&quot;os_info&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">os_info</span><span class="p">,</span>
+            <span class="s2">&quot;working_directory&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">working_directory</span><span class="p">,</span>
+        <span class="p">}</span></div>
+</div>
+
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ModelConfig</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Configuration for a single model.&quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">options</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_string</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">model_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ModelConfig</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create ModelConfig from a simple string.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">model_str</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="p">[])</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">ModelConfig</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create ModelConfig from dictionary.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s2">&quot;name&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Model config must have &#39;name&#39; field&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="n">options</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;options&quot;</span><span class="p">,</span> <span class="p">[]))</span>
+
+
+<div class="viewcode-block" id="NllmConfig">
+<a class="viewcode-back" href="../../api.html#nllm.NllmConfig">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NllmConfig</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Configuration for nllm runs.&quot;&quot;&quot;</span>
+
+    <span class="n">models</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ModelConfig</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">120</span>
+    <span class="n">retries</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">stream</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">outdir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;./nllm-runs&quot;</span>
+    <span class="n">costs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+
+<div class="viewcode-block" id="NllmConfig.get_model_names">
+<a class="viewcode-back" href="../../api.html#nllm.NllmConfig.get_model_names">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_model_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get list of model names.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="NllmConfig.get_model_config">
+<a class="viewcode-back" href="../../api.html#nllm.NllmConfig.get_model_config">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_model_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ModelConfig</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get configuration for a specific model.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">model_name</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">model</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="NllmConfig.from_dict">
+<a class="viewcode-back" href="../../api.html#nllm.NllmConfig.from_dict">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">NllmConfig</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create config from dictionary (loaded from YAML).&quot;&quot;&quot;</span>
+        <span class="c1"># Parse models - support both string and dict formats</span>
+        <span class="n">raw_models</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;models&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">models</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">raw_models</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ModelConfig</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ModelConfig</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid model configuration: </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">models</span><span class="o">=</span><span class="n">models</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;defaults&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;timeout&quot;</span><span class="p">,</span> <span class="mi">120</span><span class="p">),</span>
+            <span class="n">retries</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;defaults&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;retries&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+            <span class="n">stream</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;defaults&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stream&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+            <span class="n">outdir</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;defaults&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;outdir&quot;</span><span class="p">,</span> <span class="s2">&quot;./nllm-runs&quot;</span><span class="p">),</span>
+            <span class="n">costs</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;costs&quot;</span><span class="p">,</span> <span class="p">{}),</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="NllmConfig.merge_cli_args">
+<a class="viewcode-back" href="../../api.html#nllm.NllmConfig.merge_cli_args">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">merge_cli_args</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">models</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ModelConfig</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">retries</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">stream</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">outdir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NllmConfig</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create new config with CLI arguments merged in.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">NllmConfig</span><span class="p">(</span>
+            <span class="n">models</span><span class="o">=</span><span class="n">models</span> <span class="k">if</span> <span class="n">models</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span> <span class="k">if</span> <span class="n">timeout</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">,</span>
+            <span class="n">retries</span><span class="o">=</span><span class="n">retries</span> <span class="k">if</span> <span class="n">retries</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">retries</span><span class="p">,</span>
+            <span class="n">stream</span><span class="o">=</span><span class="n">stream</span> <span class="k">if</span> <span class="n">stream</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="p">,</span>
+            <span class="n">outdir</span><span class="o">=</span><span class="n">outdir</span> <span class="k">if</span> <span class="n">outdir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">outdir</span><span class="p">,</span>
+            <span class="n">costs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">costs</span><span class="p">,</span>
+        <span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="ExecutionContext">
+<a class="viewcode-back" href="../../api.html#nllm.ExecutionContext">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExecutionContext</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Context for a nllm execution run.&quot;&quot;&quot;</span>
+
+    <span class="n">config</span><span class="p">:</span> <span class="n">NllmConfig</span>
+    <span class="n">llm_args</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">output_dir</span><span class="p">:</span> <span class="n">Path</span>
+    <span class="n">manifest</span><span class="p">:</span> <span class="n">RunManifest</span>
+    <span class="n">quiet</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">raw_output</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">using_temp_dir</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="ExecutionContext.get_model_output_paths">
+<a class="viewcode-back" href="../../api.html#nllm.ExecutionContext.get_model_output_paths">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_model_output_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="n">Path</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get stdout and stderr output paths for a model.&quot;&quot;&quot;</span>
+        <span class="n">raw_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;raw&quot;</span>
+        <span class="n">raw_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">raw_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="si">}</span><span class="s2">.stdout.txt&quot;</span><span class="p">,</span>
+            <span class="n">raw_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="si">}</span><span class="s2">.stderr.txt&quot;</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ExecutionContext.get_results_dir">
+<a class="viewcode-back" href="../../api.html#nllm.ExecutionContext.get_results_dir">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_results_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the results directory path.&quot;&quot;&quot;</span>
+        <span class="n">results_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;results&quot;</span>
+        <span class="n">results_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">results_dir</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Ryan Nikolaidis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

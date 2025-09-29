@@ -9,7 +9,7 @@ install: ## Install dependencies
 	uv sync
 
 install-dev: ## Install development dependencies
-	uv sync --all-extras
+	uv sync --extra dev
 
 test: install-dev ## Run tests (auto-installs dev dependencies)
 	uv run pytest
@@ -81,7 +81,7 @@ clean: ## Clean up build artifacts
 	find . -type f -name "*.pyc" -delete
 
 docs: install-dev ## Build Sphinx documentation (auto-installs dev dependencies)
-	cd docs/sphinx && uv run sphinx-build -b html . _build/html
+	cd docs/sphinx && uv run python -m sphinx -b html . _build/html
 	@echo "Documentation built! Open docs/sphinx/_build/html/index.html in your browser"
 
 docs-serve: docs ## Build and serve documentation locally (auto-installs dev dependencies)

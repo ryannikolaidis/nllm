@@ -1,0 +1,217 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Search &mdash; nllm 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+    
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=01f34227"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="#" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            nllm
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="#" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#from-source">From Source</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#development-installation">Development Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#requirements">Requirements</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#command-line">Command Line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#python-api">Python API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-nllm">nllm module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api.html#nllm.run"><code class="docutils literal notranslate"><span class="pre">run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#nllm.ExecutionContext"><code class="docutils literal notranslate"><span class="pre">ExecutionContext</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.ExecutionContext.__init__"><code class="docutils literal notranslate"><span class="pre">ExecutionContext.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.ExecutionContext.dry_run"><code class="docutils literal notranslate"><span class="pre">ExecutionContext.dry_run</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.ExecutionContext.get_model_output_paths"><code class="docutils literal notranslate"><span class="pre">ExecutionContext.get_model_output_paths()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.ExecutionContext.get_results_dir"><code class="docutils literal notranslate"><span class="pre">ExecutionContext.get_results_dir()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.ExecutionContext.quiet"><code class="docutils literal notranslate"><span class="pre">ExecutionContext.quiet</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.ExecutionContext.raw_output"><code class="docutils literal notranslate"><span class="pre">ExecutionContext.raw_output</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.ExecutionContext.using_temp_dir"><code class="docutils literal notranslate"><span class="pre">ExecutionContext.using_temp_dir</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.ExecutionContext.config"><code class="docutils literal notranslate"><span class="pre">ExecutionContext.config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.ExecutionContext.llm_args"><code class="docutils literal notranslate"><span class="pre">ExecutionContext.llm_args</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.ExecutionContext.output_dir"><code class="docutils literal notranslate"><span class="pre">ExecutionContext.output_dir</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.ExecutionContext.manifest"><code class="docutils literal notranslate"><span class="pre">ExecutionContext.manifest</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#nllm.ModelResult"><code class="docutils literal notranslate"><span class="pre">ModelResult</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.ModelResult.__init__"><code class="docutils literal notranslate"><span class="pre">ModelResult.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.ModelResult.json"><code class="docutils literal notranslate"><span class="pre">ModelResult.json</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.ModelResult.stderr_tail"><code class="docutils literal notranslate"><span class="pre">ModelResult.stderr_tail</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.ModelResult.to_dict"><code class="docutils literal notranslate"><span class="pre">ModelResult.to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.ModelResult.model"><code class="docutils literal notranslate"><span class="pre">ModelResult.model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.ModelResult.status"><code class="docutils literal notranslate"><span class="pre">ModelResult.status</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.ModelResult.duration_ms"><code class="docutils literal notranslate"><span class="pre">ModelResult.duration_ms</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.ModelResult.exit_code"><code class="docutils literal notranslate"><span class="pre">ModelResult.exit_code</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.ModelResult.text"><code class="docutils literal notranslate"><span class="pre">ModelResult.text</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.ModelResult.meta"><code class="docutils literal notranslate"><span class="pre">ModelResult.meta</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.ModelResult.command"><code class="docutils literal notranslate"><span class="pre">ModelResult.command</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#nllm.NllmConfig"><code class="docutils literal notranslate"><span class="pre">NllmConfig</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.NllmConfig.__init__"><code class="docutils literal notranslate"><span class="pre">NllmConfig.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.NllmConfig.from_dict"><code class="docutils literal notranslate"><span class="pre">NllmConfig.from_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.NllmConfig.get_model_config"><code class="docutils literal notranslate"><span class="pre">NllmConfig.get_model_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.NllmConfig.get_model_names"><code class="docutils literal notranslate"><span class="pre">NllmConfig.get_model_names()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.NllmConfig.merge_cli_args"><code class="docutils literal notranslate"><span class="pre">NllmConfig.merge_cli_args()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.NllmConfig.outdir"><code class="docutils literal notranslate"><span class="pre">NllmConfig.outdir</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.NllmConfig.retries"><code class="docutils literal notranslate"><span class="pre">NllmConfig.retries</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.NllmConfig.stream"><code class="docutils literal notranslate"><span class="pre">NllmConfig.stream</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.NllmConfig.timeout"><code class="docutils literal notranslate"><span class="pre">NllmConfig.timeout</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.NllmConfig.models"><code class="docutils literal notranslate"><span class="pre">NllmConfig.models</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.NllmConfig.costs"><code class="docutils literal notranslate"><span class="pre">NllmConfig.costs</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#nllm.NllmResults"><code class="docutils literal notranslate"><span class="pre">NllmResults</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.NllmResults.__init__"><code class="docutils literal notranslate"><span class="pre">NllmResults.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.NllmResults.failed_models"><code class="docutils literal notranslate"><span class="pre">NllmResults.failed_models</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.NllmResults.get_result"><code class="docutils literal notranslate"><span class="pre">NllmResults.get_result()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.NllmResults.success"><code class="docutils literal notranslate"><span class="pre">NllmResults.success</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.NllmResults.successful_models"><code class="docutils literal notranslate"><span class="pre">NllmResults.successful_models</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.NllmResults.results"><code class="docutils literal notranslate"><span class="pre">NllmResults.results</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.NllmResults.manifest"><code class="docutils literal notranslate"><span class="pre">NllmResults.manifest</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.NllmResults.success_count"><code class="docutils literal notranslate"><span class="pre">NllmResults.success_count</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.NllmResults.total_count"><code class="docutils literal notranslate"><span class="pre">NllmResults.total_count</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.NllmResults.exit_code"><code class="docutils literal notranslate"><span class="pre">NllmResults.exit_code</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#nllm.RunManifest"><code class="docutils literal notranslate"><span class="pre">RunManifest</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.RunManifest.__init__"><code class="docutils literal notranslate"><span class="pre">RunManifest.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.RunManifest.create"><code class="docutils literal notranslate"><span class="pre">RunManifest.create()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.RunManifest.git_sha"><code class="docutils literal notranslate"><span class="pre">RunManifest.git_sha</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.RunManifest.llm_version"><code class="docutils literal notranslate"><span class="pre">RunManifest.llm_version</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.RunManifest.to_dict"><code class="docutils literal notranslate"><span class="pre">RunManifest.to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.RunManifest.cli_args"><code class="docutils literal notranslate"><span class="pre">RunManifest.cli_args</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.RunManifest.resolved_models"><code class="docutils literal notranslate"><span class="pre">RunManifest.resolved_models</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.RunManifest.timestamp"><code class="docutils literal notranslate"><span class="pre">RunManifest.timestamp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.RunManifest.hostname"><code class="docutils literal notranslate"><span class="pre">RunManifest.hostname</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.RunManifest.config_paths_used"><code class="docutils literal notranslate"><span class="pre">RunManifest.config_paths_used</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.RunManifest.os_info"><code class="docutils literal notranslate"><span class="pre">RunManifest.os_info</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#nllm.RunManifest.working_directory"><code class="docutils literal notranslate"><span class="pre">RunManifest.working_directory</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-nllm.cli">nllm.cli module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api.html#nllm.cli.version_callback"><code class="docutils literal notranslate"><span class="pre">version_callback()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#nllm.cli.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#nllm.cli.cli_main"><code class="docutils literal notranslate"><span class="pre">cli_main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-nllm.app">nllm.app module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api.html#nllm.app.run"><code class="docutils literal notranslate"><span class="pre">run()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">nllm</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Search</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <noscript>
+  <div id="fallback" class="admonition warning">
+    <p class="last">
+      Please activate JavaScript to enable the search functionality.
+    </p>
+  </div>
+  </noscript>
+
+  
+  <div id="search-results">
+  
+  </div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Ryan Nikolaidis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+  <script>
+    jQuery(function() { Search.loadIndex("searchindex.js"); });
+  </script>
+  
+  <script id="searchindexloader"></script>
+   
+
+
+</body>
+</html>
