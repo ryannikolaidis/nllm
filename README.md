@@ -6,7 +6,8 @@ Multi-model fan-out wrapper for the `llm` CLI tool. Execute the same prompt acro
 
 - **Multi-model execution** - Run prompts across multiple AI models simultaneously
 - **Streaming output** - Real-time console feedback with model-tagged output
-- **Flexible configuration** - CLI arguments or YAML config files
+- **Flexible configuration** - CLI arguments or YAML config files with per-model options
+- **JSON extraction** - Automatically detect and parse JSON responses from model outputs
 - **Structured artifacts** - JSON/JSONL output with complete run metadata
 - **Robust error handling** - Per-model timeouts, retries, and failure classification
 - **Pass-through compatibility** - Transparently forwards all `llm` flags and options
@@ -68,6 +69,9 @@ nllm -m gpt-4 -m claude-3-sonnet -- "Explain quantum computing in simple terms"
 # Use a config file with predefined models
 nllm -- "What is the capital of France?"
 
+# With per-model options
+nllm -m gpt-4 --model-option gpt-4:-o:temperature:0.2 -- "Generate code"
+
 # Dry run to see what commands would be executed
 nllm -m gpt-4 --dry-run -- "Hello world"
 
@@ -96,11 +100,18 @@ print(f"Completed: {results.success_count}/{results.total_count} models")
 for result in results.results:
     print(f"{result.model}: {result.text[:100]}...")
 
-# With configuration options
+    # Access parsed JSON if available
+    if result.json:
+        print(f"Parsed JSON: {result.json}")
+
+# With configuration options and per-model options
 results = nllm.run(
     cli_models=["gpt-4o-mini", "gemini-pro"],
-    outdir="./my-results",  # Save files instead of using temp
-    parallel=2,
+    cli_model_options=[
+        "gpt-4o-mini:-o:temperature:0.1",
+        "gemini-pro:--system:You are concise"
+    ],
+    outdir="./my-results",
     timeout=60,
     dry_run=True,
     llm_args=["-t", "0.7", "Write a haiku about programming"]
@@ -110,6 +121,9 @@ results = nllm.run(
 gpt4_result = results.get_result("gpt-4o-mini")
 if gpt4_result and gpt4_result.status == "ok":
     print(f"GPT-4 response: {gpt4_result.text}")
+    # Check for extracted JSON
+    if gpt4_result.json:
+        print(f"JSON data: {gpt4_result.json}")
 
 # Error handling - exceptions are raised for configuration errors
 try:
@@ -122,7 +136,7 @@ except nllm.ConfigError as e:
 ```
 
 The `run()` function returns an `NllmResults` object with:
-- `results`: List of individual model results
+- `results`: List of individual model results (with `json` field for parsed JSON)
 - `success`: Boolean - True if all models completed successfully
 - `exit_code`: Integer (0 for success, 1 for any failures)
 - `success_count`/`total_count`: Counters
@@ -142,9 +156,9 @@ nllm [OPTIONS] -- [PROMPT and/or llm passthrough args]
 | Option | Description |
 |--------|-------------|
 | `-m, --model` | Model to use (repeatable). Overrides config file models |
+| `--model-option` | Per-model options in format `model:option1:option2:...` (repeatable) |
 | `-c, --config` | Path to config file (default: `./.nllm-config.yaml` or `~/.nllm/config.yaml`) |
 | `-o, --outdir` | Output directory for results (default: `./nllm-runs/<timestamp>`) |
-| `--parallel N` | Maximum concurrent models (default: 4) |
 | `--timeout SECONDS` | Per-model timeout in seconds (default: 120) |
 | `--retries N` | Per-model retries for transient errors (default: 0) |
 | `--stream/--no-stream` | Stream model outputs to console (default: `--stream`) |
@@ -168,18 +182,36 @@ nllm -m gpt-4 -m claude-3-sonnet -m gemini-pro -- "Explain recursion"
 nllm -m gpt-4 -- -t 0.2 --system "You are helpful" "Plan my day"
 ```
 
+#### Per-Model Options
+
+```bash
+# Set different temperatures for different models
+nllm -m gpt-4 -m claude-3-sonnet \\
+  --model-option gpt-4:-o:temperature:0.2 \\
+  --model-option claude-3-sonnet:-o:temperature:0.8 \\
+  -- "Write creative content"
+
+# Per-model system prompts
+nllm -m gpt-4 -m claude-3-sonnet \\
+  --model-option gpt-4:--system:"You are precise and analytical" \\
+  --model-option claude-3-sonnet:--system:"You are creative and conversational" \\
+  -- "Explain machine learning"
+```
+
 #### Using Configuration Files
 
 Create `.nllm-config.yaml`:
 
 ```yaml
+# Support both simple strings and per-model options
 models:
-  - "gpt-4"
-  - "claude-3-sonnet"
-  - "gemini-pro"
+  - "gpt-4"  # Simple format
+  - name: "claude-3-sonnet"  # With per-model options
+    options: ["-o", "temperature", "0.2", "--system", "You are concise"]
+  - name: "gemini-pro"
+    options: ["-o", "temperature", "0.8"]
 
 defaults:
-  parallel: 3
   timeout: 120
   retries: 1
   stream: true
@@ -215,6 +247,45 @@ nllm --raw -m gpt-4 -- "Debug this code: print('hello')"
 
 # Quiet mode for scripts
 nllm -q -m gpt-4 -- "Generate random number" | jq '.results[0].text'
+```
+
+## JSON Extraction
+
+nllm automatically detects and extracts JSON from model responses using multiple strategies:
+
+1. **Direct JSON parsing** - Raw JSON objects or arrays
+2. **Markdown code blocks** - `\`\`\`json` or `\`\`\`` blocks containing JSON
+3. **Embedded JSON** - JSON objects/arrays found within larger text
+
+The extracted JSON is available in the `json` field of each `ModelResult`:
+
+```python
+result = results.get_result("gpt-4")
+if result.json:
+    # JSON was successfully extracted and parsed
+    data = result.json  # dict, list, or None
+```
+
+### JSON Examples
+
+Models can return JSON in various formats, all automatically detected:
+
+```json
+{"status": "success", "data": [1, 2, 3]}
+```
+
+```markdown
+Here's the data you requested:
+```json
+{
+  "results": ["item1", "item2"],
+  "count": 2
+}
+```
+```
+
+```text
+The analysis shows: {"confidence": 0.95, "prediction": "positive"}
 ```
 
 ## Output Structure
@@ -253,7 +324,7 @@ Each nllm run creates a timestamped directory with structured output:
 
 ### Results Format
 
-Each line in `results.jsonl`:
+Each line in `results.jsonl` and individual result files:
 
 ```json
 {
@@ -268,7 +339,27 @@ Each line in `results.jsonl`:
     "cost_estimated": 0.0012
   },
   "command": ["llm", "-m", "gpt-4", "Hello world"],
-  "stderr_tail": "Usage: 30 tokens"
+  "stderr_tail": "Usage: 30 tokens",
+  "json": null
+}
+```
+
+With JSON extraction:
+
+```json
+{
+  "model": "gpt-4",
+  "status": "ok",
+  "duration_ms": 1834,
+  "exit_code": 0,
+  "text": "```json\\n{\\\"status\\\": \\\"success\\\", \\\"data\\\": [1, 2, 3]}\\n```",
+  "meta": {},
+  "command": ["llm", "-m", "gpt-4", "Return JSON"],
+  "stderr_tail": "",
+  "json": {
+    "status": "success",
+    "data": [1, 2, 3]
+  }
 }
 ```
 
@@ -283,15 +374,16 @@ Each line in `results.jsonl`:
 ### Config File Schema
 
 ```yaml
-# List of models to use by default
+# List of models - supports both simple and advanced formats
 models:
-  - "gpt-4"
-  - "claude-3-sonnet"
-  - "gemini-pro"
+  - "gpt-4"  # Simple string format
+  - name: "claude-3-sonnet"  # Object format with options
+    options: ["-o", "temperature", "0.2", "--system", "Be concise"]
+  - name: "gemini-pro"
+    options: ["-o", "temperature", "0.8"]
 
 # Default behavior settings
 defaults:
-  parallel: 4       # Max concurrent models
   timeout: 120      # Per-model timeout (seconds)
   retries: 0        # Per-model retries for transient errors
   stream: true      # Stream outputs to console
@@ -314,10 +406,10 @@ costs:
 cat > .nllm-config.yaml << 'EOF'
 models:
   - "gpt-4"
-  - "claude-3-sonnet"
+  - name: "claude-3-sonnet"
+    options: ["--system", "You are helpful"]
 
 defaults:
-  parallel: 3
   timeout: 180
   retries: 1
 EOF
@@ -334,7 +426,7 @@ EOF
 
 ## Error Handling
 
-Prompter classifies errors as either **transient** (retryable) or **permanent**:
+nllm classifies errors as either **transient** (retryable) or **permanent**:
 
 ### Transient Errors (Will Retry)
 - Connection timeouts
@@ -378,8 +470,8 @@ llm keys set anthropic your-key-here
 
 **Models timing out**
 ```bash
-# Increase timeout or reduce concurrency
-nllm --timeout 300 --parallel 2 -m gpt-4 -- "Complex task"
+# Increase timeout
+nllm --timeout 300 -m gpt-4 -- "Complex task"
 ```
 
 ### Debug Mode
@@ -434,16 +526,17 @@ make version-dev
 ```
 nllm/
 ├── nllm/
-│   ├── __init__.py       # Version info
-│   ├── cli.py           # CLI interface
-│   ├── app.py           # Main application logic
-│   ├── core.py          # Execution engine
-│   ├── config.py        # Configuration management
-│   ├── models.py        # Data models
-│   ├── utils.py         # Utilities and error handling
+│   ├── __init__.py       # Version info and exports
+│   ├── cli.py           # CLI interface (Typer)
+│   ├── app.py           # Main application logic and Python API
+│   ├── core.py          # Execution engine (async subprocess management)
+│   ├── config.py        # Configuration loading and validation
+│   ├── models.py        # Data models (Pydantic-style dataclasses)
+│   ├── utils.py         # Utilities (JSON extraction, error handling)
 │   └── constants.py     # Constants and defaults
-├── tests/               # Test suite
+├── tests/               # Comprehensive test suite
 ├── docs/                # Documentation
+│   └── design/          # Architecture and design documents
 └── pyproject.toml       # Project configuration
 ```
 
@@ -453,7 +546,9 @@ The test suite includes:
 - Unit tests for all modules
 - Integration tests with mocked `llm` subprocess
 - Configuration loading and validation tests
+- JSON extraction tests with various formats
 - Error handling and edge case tests
+- Per-model options functionality
 
 ```bash
 # Run specific test files
@@ -461,6 +556,9 @@ uv run pytest tests/test_config.py -v
 
 # Run with coverage reporting
 make test-cov
+
+# Test specific functionality
+uv run pytest tests/test_utils.py::TestExtractJsonFromText -v
 ```
 
 ## License
