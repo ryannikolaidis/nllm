@@ -114,7 +114,9 @@ def create_timestamped_dir(base_dir: str) -> Path:
     return output_dir
 
 
-def construct_llm_command(model: str, llm_args: list[str], model_options: list[str] | None = None) -> list[str]:
+def construct_llm_command(
+    model: str, llm_args: list[str], model_options: list[str] | None = None
+) -> list[str]:
     """Construct llm command for a specific model with per-model options."""
     command = ["llm"]
 
@@ -273,3 +275,92 @@ def parse_json_safely(text: str) -> dict | None:
         return json.loads(text)
     except (json.JSONDecodeError, ValueError):
         return None
+
+
+def extract_json_from_text(text: str) -> dict | list | None:
+    """
+    Extract JSON from text, handling both raw JSON and markdown code blocks.
+
+    This function attempts to find and parse JSON in the following formats:
+    1. Raw JSON (starts with { or [)
+    2. Markdown code blocks with json, JSON, or no language specifier
+
+    Returns the parsed JSON object/array, or None if no valid JSON found.
+    """
+    if not text or not text.strip():
+        return None
+
+    text = text.strip()
+
+    # First try: direct JSON parsing if text looks like JSON
+    if is_likely_json(text):
+        result = parse_json_safely(text)
+        if result is not None:
+            return result
+
+    # Second try: extract from markdown code blocks
+    # Look for patterns like ```json\n{...}\n``` or ```\n{...}\n```
+    code_block_patterns = [
+        r"```(?:json|JSON)?\s*\n([\s\S]*?)\n```",  # ```json or ``` with content
+        r"`([^`\n]*)`",  # Single backticks for inline code
+    ]
+
+    for pattern in code_block_patterns:
+        matches = re.findall(pattern, text, re.MULTILINE | re.DOTALL)
+        for match in matches:
+            candidate = match.strip()
+            if is_likely_json(candidate):
+                result = parse_json_safely(candidate)
+                if result is not None:
+                    return result
+
+    # Third try: look for JSON-like patterns in the text without markdown
+    # Use a more sophisticated approach to find complete JSON objects/arrays
+    # This handles deeply nested structures better
+    def find_json_boundaries(text, start_char, end_char):
+        """Find the boundaries of a JSON structure starting from start_char."""
+        results = []
+        start_idx = 0
+
+        while True:
+            start_pos = text.find(start_char, start_idx)
+            if start_pos == -1:
+                break
+
+            # Count braces/brackets to find the end
+            count = 0
+            end_pos = start_pos
+
+            for i in range(start_pos, len(text)):
+                char = text[i]
+                if char == start_char:
+                    count += 1
+                elif char == end_char:
+                    count -= 1
+                    if count == 0:
+                        end_pos = i
+                        break
+
+            if count == 0:  # Found matching end
+                candidate = text[start_pos : end_pos + 1].strip()
+                if len(candidate) > 10:  # Avoid matching tiny snippets
+                    results.append(candidate)
+                start_idx = end_pos + 1
+            else:
+                start_idx = start_pos + 1
+
+        return results
+
+    # Look for JSON objects
+    for candidate in find_json_boundaries(text, "{", "}"):
+        result = parse_json_safely(candidate)
+        if result is not None:
+            return result
+
+    # Look for JSON arrays
+    for candidate in find_json_boundaries(text, "[", "]"):
+        result = parse_json_safely(candidate)
+        if result is not None:
+            return result
+
+    return None

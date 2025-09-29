@@ -17,7 +17,7 @@ class TestPerModelOptions:
 
         expected = {
             "gpt-4": ["-o", "temperature", "0.7"],
-            "claude-3-sonnet": ["--system", "Be concise"]
+            "claude-3-sonnet": ["--system", "Be concise"],
         }
         assert result == expected
 
@@ -26,9 +26,7 @@ class TestPerModelOptions:
         options = ["gpt-4:-o:temperature:0.7", "gpt-4:--system:Be helpful"]
         result = parse_cli_model_options(options)
 
-        expected = {
-            "gpt-4": ["-o", "temperature", "0.7", "--system", "Be helpful"]
-        }
+        expected = {"gpt-4": ["-o", "temperature", "0.7", "--system", "Be helpful"]}
         assert result == expected
 
     def test_parse_cli_model_options_invalid_format(self):
@@ -43,7 +41,7 @@ class TestPerModelOptions:
 
         expected = [
             ModelConfig(name="gpt-4", options=[]),
-            ModelConfig(name="claude-3-sonnet", options=[])
+            ModelConfig(name="claude-3-sonnet", options=[]),
         ]
         assert result == expected
 
@@ -55,34 +53,40 @@ class TestPerModelOptions:
 
         expected = [
             ModelConfig(name="gpt-4", options=["-o", "temperature", "0.7"]),
-            ModelConfig(name="claude-3-sonnet", options=["--system", "Be concise"])
+            ModelConfig(name="claude-3-sonnet", options=["--system", "Be concise"]),
         ]
         assert result == expected
 
     def test_resolve_models_config_only(self):
         """Test resolving models from config only."""
-        config = NllmConfig(models=[
-            ModelConfig(name="gpt-4", options=["-o", "temperature", "0.5"]),
-            ModelConfig(name="claude-3-sonnet", options=[])
-        ])
+        config = NllmConfig(
+            models=[
+                ModelConfig(name="gpt-4", options=["-o", "temperature", "0.5"]),
+                ModelConfig(name="claude-3-sonnet", options=[]),
+            ]
+        )
         result = resolve_models(None, [], config)
 
         expected = [
             ModelConfig(name="gpt-4", options=["-o", "temperature", "0.5"]),
-            ModelConfig(name="claude-3-sonnet", options=[])
+            ModelConfig(name="claude-3-sonnet", options=[]),
         ]
         assert result == expected
 
     def test_resolve_models_config_with_cli_options_merge(self):
         """Test resolving models from config with CLI options merged."""
-        config = NllmConfig(models=[
-            ModelConfig(name="gpt-4", options=["-o", "temperature", "0.5"]),
-        ])
+        config = NllmConfig(
+            models=[
+                ModelConfig(name="gpt-4", options=["-o", "temperature", "0.5"]),
+            ]
+        )
         cli_options = ["gpt-4:--system:Be helpful"]
         result = resolve_models(None, cli_options, config)
 
         expected = [
-            ModelConfig(name="gpt-4", options=["-o", "temperature", "0.5", "--system", "Be helpful"])
+            ModelConfig(
+                name="gpt-4", options=["-o", "temperature", "0.5", "--system", "Be helpful"]
+            )
         ]
         assert result == expected
 
@@ -92,9 +96,7 @@ class TestPerModelOptions:
         cli_options = ["gpt-4:-o:temperature:0.7"]
         result = resolve_models(None, cli_options, config)
 
-        expected = [
-            ModelConfig(name="gpt-4", options=["-o", "temperature", "0.7"])
-        ]
+        expected = [ModelConfig(name="gpt-4", options=["-o", "temperature", "0.7"])]
         assert result == expected
 
     def test_model_config_from_string(self):
@@ -121,23 +123,25 @@ class TestPerModelOptions:
         data = {
             "models": [
                 "gpt-4",  # String format
-                {"name": "claude-3-sonnet", "options": ["-o", "temperature", "0.2"]}  # Dict format
+                {"name": "claude-3-sonnet", "options": ["-o", "temperature", "0.2"]},  # Dict format
             ]
         }
         result = NllmConfig.from_dict(data)
 
         expected_models = [
             ModelConfig(name="gpt-4", options=[]),
-            ModelConfig(name="claude-3-sonnet", options=["-o", "temperature", "0.2"])
+            ModelConfig(name="claude-3-sonnet", options=["-o", "temperature", "0.2"]),
         ]
         assert result.models == expected_models
 
     def test_nllm_config_get_model_names(self):
         """Test getting model names from NllmConfig."""
-        config = NllmConfig(models=[
-            ModelConfig(name="gpt-4", options=[]),
-            ModelConfig(name="claude-3-sonnet", options=["-o", "temperature", "0.2"])
-        ])
+        config = NllmConfig(
+            models=[
+                ModelConfig(name="gpt-4", options=[]),
+                ModelConfig(name="claude-3-sonnet", options=["-o", "temperature", "0.2"]),
+            ]
+        )
         result = config.get_model_names()
         expected = ["gpt-4", "claude-3-sonnet"]
         assert result == expected

@@ -134,7 +134,9 @@ def parse_cli_model_options(model_options: list[str]) -> dict[str, list[str]]:
     result = {}
     for option_spec in model_options:
         if ":" not in option_spec:
-            raise ConfigError(f"Invalid model option format: {option_spec}. Expected format: model:option1:option2:...")
+            raise ConfigError(
+                f"Invalid model option format: {option_spec}. Expected format: model:option1:option2:..."
+            )
 
         parts = option_spec.split(":")
         model_name = parts[0]
@@ -148,7 +150,9 @@ def parse_cli_model_options(model_options: list[str]) -> dict[str, list[str]]:
     return result
 
 
-def resolve_models(cli_models: list[str] | None, cli_model_options: list[str], config: NllmConfig) -> list[ModelConfig]:
+def resolve_models(
+    cli_models: list[str] | None, cli_model_options: list[str], config: NllmConfig
+) -> list[ModelConfig]:
     """Resolve final model list from CLI args and config."""
     # Parse CLI model options
     cli_options_map = parse_cli_model_options(cli_model_options)
@@ -176,8 +180,10 @@ def resolve_models(cli_models: list[str] | None, cli_model_options: list[str], c
 
     # No models specified in config, but CLI options might reference models
     if cli_options_map:
-        return [ModelConfig(name=model_name, options=options)
-                for model_name, options in cli_options_map.items()]
+        return [
+            ModelConfig(name=model_name, options=options)
+            for model_name, options in cli_options_map.items()
+        ]
 
     # No models specified anywhere
     return []

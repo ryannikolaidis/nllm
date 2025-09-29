@@ -13,6 +13,7 @@ from nllm.utils import (
     classify_error,
     construct_llm_command,
     create_timestamped_dir,
+    extract_json_from_text,
     format_duration,
     get_git_sha,
     is_likely_json,
@@ -408,3 +409,209 @@ class TestJsonUtilities:
         """Test parsing empty string."""
         result = parse_json_safely("")
         assert result is None
+
+
+class TestExtractJsonFromText:
+    """Test JSON extraction from text and markdown."""
+
+    def test_extract_raw_json_object(self):
+        """Test extracting raw JSON object."""
+        text = '{"key": "value", "number": 42}'
+        result = extract_json_from_text(text)
+        assert result == {"key": "value", "number": 42}
+
+    def test_extract_raw_json_array(self):
+        """Test extracting raw JSON array."""
+        text = '[{"name": "test"}, {"name": "test2"}]'
+        result = extract_json_from_text(text)
+        assert result == [{"name": "test"}, {"name": "test2"}]
+
+    def test_extract_json_with_whitespace(self):
+        """Test extracting JSON with surrounding whitespace."""
+        text = '   \n  {"key": "value"}  \n  '
+        result = extract_json_from_text(text)
+        assert result == {"key": "value"}
+
+    def test_extract_json_from_markdown_code_block(self):
+        """Test extracting JSON from markdown code block."""
+        text = """Here is the analysis:
+
+```json
+{
+  "summary": {
+    "readiness": "approve_with_nits",
+    "risk_level": "low"
+  },
+  "findings": []
+}
+```
+
+That's the result."""
+        result = extract_json_from_text(text)
+        expected = {
+            "summary": {"readiness": "approve_with_nits", "risk_level": "low"},
+            "findings": [],
+        }
+        assert result == expected
+
+    def test_extract_json_from_markdown_no_language(self):
+        """Test extracting JSON from markdown code block without language specifier."""
+        text = """The result is:
+
+```
+{"status": "success", "data": [1, 2, 3]}
+```
+
+Done."""
+        result = extract_json_from_text(text)
+        assert result == {"status": "success", "data": [1, 2, 3]}
+
+    def test_extract_json_from_markdown_uppercase(self):
+        """Test extracting JSON from markdown with uppercase JSON specifier."""
+        text = """```JSON
+{"result": "test"}
+```"""
+        result = extract_json_from_text(text)
+        assert result == {"result": "test"}
+
+    def test_extract_json_complex_example(self):
+        """Test extracting the complex JSON example from the user's request."""
+        text = """```json
+{
+  "summary": {
+    "readiness": "approve_with_nits",
+    "risk_level": "low",
+    "overall_risk_score": 0,
+    "overview": "Adds a non-blocking GitHub Actions workflow and comprehensive test fixtures for CONTRIBUTING.md compliance. No correctness or security risks; minor nits in documentation and script ergonomics.",
+    "recommendation": "Proceed after addressing minor doc and script nits; no blocking issues."
+  },
+  "context": {
+    "branch": "feature/x",
+    "base": "main",
+    "commit_range": "abc123..def789",
+    "scope": "Adds GitHub Actions workflow, LLM-based compliance script, prompt, and test fixtures for contributing guide review",
+    "changed_stats": { "files": 12, "insertions": 1046, "deletions": 2, "renames": 0, "migrations": 0 }
+  },
+  "blocking_issues": [],
+  "findings": [
+    {
+      "file": "CONTRIBUTING.md",
+      "lines": "L28-L31",
+      "title": "Ambiguous language in dry-run script rule",
+      "domain": ["docs"],
+      "severity": "low",
+      "impact": "Ambiguity may cause confusion for script authors about when --dry-run is required.",
+      "evidence": "Changed bullet: '* Support `--dry-run` this is expected for scripts that perform operations, modifications, or maintenance tasks. e.g. a database maintenance script, deployment script, or file processing script should support --dry-run. This may be omitted when the operation is otherwise not safe or not applicable.'",
+      "recommended_fix": "Clarify the language, e.g.: 'Support `--dry-run` for scripts that perform operations, modifications, or maintenance tasks, unless not safe or not applicable.'"
+    }
+  ]
+}
+```"""
+        result = extract_json_from_text(text)
+
+        # Verify the structure is correct
+        assert isinstance(result, dict)
+        assert "summary" in result
+        assert "context" in result
+        assert "blocking_issues" in result
+        assert "findings" in result
+
+        # Verify specific values
+        assert result["summary"]["readiness"] == "approve_with_nits"
+        assert result["summary"]["risk_level"] == "low"
+        assert result["blocking_issues"] == []
+        assert len(result["findings"]) == 1
+        assert result["findings"][0]["file"] == "CONTRIBUTING.md"
+
+    def test_extract_from_text_with_multiple_code_blocks(self):
+        """Test extracting JSON when there are multiple code blocks."""
+        text = """Here are some examples:
+
+```bash
+echo "hello"
+```
+
+And here's the JSON:
+
+```json
+{"result": "found"}
+```
+
+And some more text."""
+        result = extract_json_from_text(text)
+        assert result == {"result": "found"}
+
+    def test_extract_json_embedded_in_text(self):
+        """Test extracting JSON that's embedded in regular text."""
+        text = """The analysis returned this result: {"status": "complete", "score": 95} which indicates success."""
+        result = extract_json_from_text(text)
+        assert result == {"status": "complete", "score": 95}
+
+    def test_extract_json_array_embedded(self):
+        """Test extracting JSON array embedded in text."""
+        text = """The items are: [{"id": 1}, {"id": 2}] as shown above."""
+        result = extract_json_from_text(text)
+        assert result == [{"id": 1}, {"id": 2}]
+
+    def test_no_json_found(self):
+        """Test when no JSON is found in text."""
+        text = """This is just regular text with no JSON content at all.
+
+        Even with some code blocks:
+
+        ```python
+        print("hello world")
+        ```
+
+        Still no JSON."""
+        result = extract_json_from_text(text)
+        assert result is None
+
+    def test_invalid_json_in_code_block(self):
+        """Test when code block contains invalid JSON."""
+        text = """```json
+        {"invalid": json, "missing": quotes}
+        ```"""
+        result = extract_json_from_text(text)
+        assert result is None
+
+    def test_empty_text(self):
+        """Test with empty text."""
+        result = extract_json_from_text("")
+        assert result is None
+
+        result = extract_json_from_text("   ")
+        assert result is None
+
+    def test_none_input(self):
+        """Test with None input."""
+        result = extract_json_from_text(None)
+        assert result is None
+
+    def test_json_with_nested_objects(self):
+        """Test extracting complex nested JSON."""
+        text = """```json
+        {
+          "level1": {
+            "level2": {
+              "level3": {
+                "data": [1, 2, 3],
+                "metadata": {
+                  "type": "nested",
+                  "valid": true
+                }
+              }
+            }
+          }
+        }
+        ```"""
+        result = extract_json_from_text(text)
+        assert isinstance(result, dict)
+        assert result["level1"]["level2"]["level3"]["data"] == [1, 2, 3]
+        assert result["level1"]["level2"]["level3"]["metadata"]["valid"] is True
+
+    def test_single_backtick_json(self):
+        """Test extracting JSON from single backticks."""
+        text = 'The result is `{"status": "ok"}` for this test.'
+        result = extract_json_from_text(text)
+        assert result == {"status": "ok"}

@@ -49,9 +49,10 @@ class TestRunNllm:
     @patch("nllm.app.load_config")
     def test_run_no_models(self, mock_load_config):
         """Test nllm run with no models specified."""
-        from nllm.models import ModelConfig, NllmConfig
-        from nllm.utils import ConfigError
         import pytest
+
+        from nllm.models import NllmConfig
+        from nllm.utils import ConfigError
 
         config = NllmConfig(models=[])
         mock_load_config.return_value = (config, [])
@@ -71,8 +72,9 @@ class TestRunNllm:
         # Mock llm not available
         mock_check_llm.return_value = (False, None)
 
-        from nllm.utils import ExecutionError
         import pytest
+
+        from nllm.utils import ExecutionError
 
         with pytest.raises(ExecutionError):
             run(cli_models=["gpt-4"], quiet=True)
@@ -117,15 +119,14 @@ class TestRunNllm:
         mock_load_config.side_effect = ConfigError("Invalid config")
 
         import pytest
+
         with pytest.raises(ConfigError):
             run(quiet=True)
 
     @patch("nllm.app.check_llm_available")
     @patch("nllm.app.NllmExecutor")
     @patch("nllm.app.load_config")
-    def test_run_execution_error(
-        self, mock_load_config, mock_executor_class, mock_check_llm
-    ):
+    def test_run_execution_error(self, mock_load_config, mock_executor_class, mock_check_llm):
         """Test nllm run with execution error."""
         from nllm.models import ModelConfig, NllmConfig
         from nllm.utils import ExecutionError
@@ -140,15 +141,14 @@ class TestRunNllm:
         mock_executor_class.return_value = mock_executor
 
         import pytest
+
         with pytest.raises(ExecutionError):
             run(cli_models=["gpt-4"], quiet=True)
 
     @patch("nllm.app.check_llm_available")
     @patch("nllm.app.NllmExecutor")
     @patch("nllm.app.load_config")
-    def test_run_keyboard_interrupt(
-        self, mock_load_config, mock_executor_class, mock_check_llm
-    ):
+    def test_run_keyboard_interrupt(self, mock_load_config, mock_executor_class, mock_check_llm):
         """Test nllm run with keyboard interrupt."""
         from nllm.models import ModelConfig, NllmConfig
 
@@ -173,7 +173,7 @@ class TestRunNllm:
             patch("nllm.app.NllmExecutor") as mock_executor_class,
             patch("nllm.app.asyncio.run") as mock_asyncio_run,
         ):
-            from nllm.models import ModelConfig, NllmConfig
+            from nllm.models import NllmConfig
 
             config = NllmConfig()
             mock_load_config.return_value = (config, [])

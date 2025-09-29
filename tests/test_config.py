@@ -1,6 +1,5 @@
 """Tests for configuration management."""
 
-
 import pytest
 import yaml
 

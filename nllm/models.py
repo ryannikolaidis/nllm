@@ -22,6 +22,7 @@ class ModelResult:
     meta: dict[str, Any] = field(default_factory=dict)
     command: list[str] = field(default_factory=list)
     stderr_tail: str = ""
+    json: dict[str, Any] | list | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
@@ -34,6 +35,7 @@ class ModelResult:
             "meta": self.meta,
             "command": self.command,
             "stderr_tail": self.stderr_tail,
+            "json": self.json,
         }
 
 
@@ -136,10 +138,7 @@ class ModelConfig:
         """Create ModelConfig from dictionary."""
         if "name" not in data:
             raise ValueError("Model config must have 'name' field")
-        return cls(
-            name=data["name"],
-            options=data.get("options", [])
-        )
+        return cls(name=data["name"], options=data.get("options", []))
 
 
 @dataclass

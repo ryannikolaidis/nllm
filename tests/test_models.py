@@ -28,6 +28,7 @@ class TestModelResult:
         assert result.meta == {}
         assert result.command == []
         assert result.stderr_tail == ""
+        assert result.json is None
 
     def test_create_result_with_metadata(self):
         """Test creating result with metadata."""
@@ -71,6 +72,7 @@ class TestModelResult:
             "meta": {"error": True},
             "command": ["llm", "-m", "gpt-4", "prompt"],
             "stderr_tail": "Error occurred",
+            "json": None,
         }
 
         assert result_dict == expected
@@ -90,6 +92,58 @@ class TestModelResult:
         json_str = json.dumps(result.to_dict())
         loaded = json.loads(json_str)
         assert loaded["model"] == "gpt-4"
+
+    def test_create_result_with_json(self):
+        """Test creating result with extracted JSON."""
+        json_data = {"status": "success", "data": [1, 2, 3]}
+        result = ModelResult(
+            model="gpt-4",
+            status="ok",
+            duration_ms=1000,
+            exit_code=0,
+            text='{"status": "success", "data": [1, 2, 3]}',
+            json=json_data,
+        )
+
+        assert result.json == json_data
+        assert result.text == '{"status": "success", "data": [1, 2, 3]}'
+
+    def test_to_dict_with_json(self):
+        """Test converting result with JSON to dictionary."""
+        json_data = {"result": "test", "score": 95}
+        result = ModelResult(
+            model="claude-3-sonnet",
+            status="ok",
+            duration_ms=2000,
+            exit_code=0,
+            text="Analysis complete: {'result': 'test', 'score': 95}",
+            json=json_data,
+        )
+
+        result_dict = result.to_dict()
+
+        assert result_dict["json"] == json_data
+        assert result_dict["model"] == "claude-3-sonnet"
+        assert result_dict["text"] == "Analysis complete: {'result': 'test', 'score': 95}"
+
+    def test_serialization_with_json(self):
+        """Test that result with JSON can be serialized."""
+        json_data = {"nested": {"values": [1, 2, 3]}, "bool": True}
+        result = ModelResult(
+            model="gpt-4",
+            status="ok",
+            duration_ms=1500,
+            exit_code=0,
+            text="Complex response with JSON",
+            json=json_data,
+        )
+
+        # Should not raise
+        json_str = json.dumps(result.to_dict())
+        loaded = json.loads(json_str)
+
+        assert loaded["json"]["nested"]["values"] == [1, 2, 3]
+        assert loaded["json"]["bool"] is True
 
 
 class TestRunManifest:
@@ -235,7 +289,9 @@ class TestNllmConfig:
 
         config = NllmConfig.from_dict(data)
 
-        assert config.models == ["gpt-4"]
+        assert len(config.models) == 1
+        assert config.models[0].name == "gpt-4"
+        assert config.models[0].options == []
         assert config.parallel == 6
         assert config.timeout == 180
         # Other fields should have defaults

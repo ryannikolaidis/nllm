@@ -26,6 +26,7 @@ from .utils import (
     ExecutionError,
     classify_error,
     construct_llm_command,
+    extract_json_from_text,
     format_duration,
     redact_secrets_from_args,
     retry_with_backoff,
@@ -38,7 +39,13 @@ from .utils import (
 class ModelExecutor:
     """Handles execution of a single model."""
 
-    def __init__(self, model_config: ModelConfig, context: ExecutionContext, console: Console, suppress_streaming: bool = False):
+    def __init__(
+        self,
+        model_config: ModelConfig,
+        context: ExecutionContext,
+        console: Console,
+        suppress_streaming: bool = False,
+    ):
         self.model_config = model_config
         self.context = context
         self.console = console
@@ -85,7 +92,9 @@ class ModelExecutor:
 
     def _create_dry_run_result(self) -> ModelResult:
         """Create a result for dry run mode."""
-        command = construct_llm_command(self.model_config.name, self.context.llm_args, self.model_config.options)
+        command = construct_llm_command(
+            self.model_config.name, self.context.llm_args, self.model_config.options
+        )
         command_str = " ".join(redact_secrets_from_args(command))
 
         if not self.context.quiet:
@@ -103,7 +112,9 @@ class ModelExecutor:
 
     async def _run_model(self) -> ModelResult:
         """Run the actual model execution."""
-        command = construct_llm_command(self.model_config.name, self.context.llm_args, self.model_config.options)
+        command = construct_llm_command(
+            self.model_config.name, self.context.llm_args, self.model_config.options
+        )
 
         # Create process
         try:
@@ -154,6 +165,9 @@ class ModelExecutor:
         duration_ms = int((self.end_time or time.time()) - (self.start_time or 0)) * 1000
 
         if exit_code == 0:
+            # Extract JSON from the output text
+            extracted_json = extract_json_from_text(stdout_data)
+
             return ModelResult(
                 model=self.model,
                 status="ok",
@@ -163,12 +177,16 @@ class ModelExecutor:
                 command=command,
                 stderr_tail=truncate_stderr(stderr_data, 5),
                 meta=self._extract_metadata(stdout_data, stderr_data),
+                json=extracted_json,
             )
         else:
             # Check if error is retryable
             is_retryable = classify_error(stderr_data)
             if is_retryable:
                 raise ExecutionError(f"Retryable error: {truncate_stderr(stderr_data, 3)}")
+
+            # Try to extract JSON even from error responses
+            extracted_json = extract_json_from_text(stdout_data)
 
             return ModelResult(
                 model=self.model,
@@ -179,6 +197,7 @@ class ModelExecutor:
                 command=command,
                 stderr_tail=truncate_stderr(stderr_data, 10),
                 meta={"error": True},
+                json=extracted_json,
             )
 
     async def _stream_output(
@@ -206,7 +225,11 @@ class ModelExecutor:
                     file_handle.flush()
 
                 # Stream to console if not quiet and not suppressed (for live progress)
-                if self.context.config.stream and not self.context.quiet and not self.suppress_streaming:
+                if (
+                    self.context.config.stream
+                    and not self.context.quiet
+                    and not self.suppress_streaming
+                ):
                     prefix = MODEL_PREFIX_FORMAT.format(model=self.model)
                     if is_stderr:
                         self.console.print(f"{prefix} [red]{line_str.rstrip()}[/red]")
@@ -224,7 +247,9 @@ class ModelExecutor:
     def _create_timeout_result(self) -> ModelResult:
         """Create result for timeout case."""
         duration_ms = int((self.end_time or time.time()) - (self.start_time or 0)) * 1000
-        command = construct_llm_command(self.model_config.name, self.context.llm_args, self.model_config.options)
+        command = construct_llm_command(
+            self.model_config.name, self.context.llm_args, self.model_config.options
+        )
 
         return ModelResult(
             model=self.model,
@@ -240,7 +265,9 @@ class ModelExecutor:
     def _create_error_result(self, error_message: str) -> ModelResult:
         """Create result for error case."""
         duration_ms = int((self.end_time or time.time()) - (self.start_time or 0)) * 1000
-        command = construct_llm_command(self.model_config.name, self.context.llm_args, self.model_config.options)
+        command = construct_llm_command(
+            self.model_config.name, self.context.llm_args, self.model_config.options
+        )
 
         return ModelResult(
             model=self.model,
@@ -256,6 +283,7 @@ class ModelExecutor:
     def _extract_metadata(self, stdout: str, stderr: str) -> dict:
         """Extract metadata from llm output (tokens, cost, etc.)."""
         import re
+
         meta = {}
 
         # Try to parse token usage from stderr (common llm pattern)
@@ -310,7 +338,7 @@ class NllmExecutor:
             self.model_status[model_config.name] = {
                 "status": "running",
                 "duration": "",
-                "result_file": ""
+                "result_file": "",
             }
 
         # Create semaphore for concurrency control
@@ -321,7 +349,10 @@ class NllmExecutor:
             # Use a lock to prevent concurrent updates
             update_lock = asyncio.Lock()
             with Live(self._create_progress_table(), refresh_per_second=1) as live:
-                tasks = [self._run_single_model_with_progress(model, live, semaphore, update_lock) for model in models]
+                tasks = [
+                    self._run_single_model_with_progress(model, live, semaphore, update_lock)
+                    for model in models
+                ]
                 self.results = await asyncio.gather(*tasks, return_exceptions=False)
         else:
             tasks = [run_single_model(model) for model in models]
@@ -354,10 +385,14 @@ class NllmExecutor:
 
         return table
 
-    async def _run_single_model_with_progress(self, model_config: ModelConfig, live, semaphore, update_lock) -> ModelResult:
+    async def _run_single_model_with_progress(
+        self, model_config: ModelConfig, live, semaphore, update_lock
+    ) -> ModelResult:
         """Run a single model and update progress table."""
         async with semaphore:
-            executor = ModelExecutor(model_config, self.context, self.console, suppress_streaming=True)
+            executor = ModelExecutor(
+                model_config, self.context, self.console, suppress_streaming=True
+            )
             result = await executor.execute()
 
             # Update status based on result (with lock to prevent concurrent updates)
@@ -366,27 +401,25 @@ class NllmExecutor:
                     self.model_status[model_config.name] = {
                         "status": "completed",
                         "duration": format_duration(result.duration_ms),
-                        "result_file": f"results/{sanitize_filename(model_config.name)}.json"
+                        "result_file": f"results/{sanitize_filename(model_config.name)}.json",
                     }
                 elif result.status == "timeout":
                     self.model_status[model_config.name] = {
                         "status": "timeout",
                         "duration": format_duration(result.duration_ms),
-                        "result_file": ""
+                        "result_file": "",
                     }
                 else:
                     self.model_status[model_config.name] = {
                         "status": "error",
                         "duration": format_duration(result.duration_ms),
-                        "result_file": ""
+                        "result_file": "",
                     }
 
                 # Update the live display
                 live.update(self._create_progress_table())
 
             return result
-
-
 
     async def _save_artifacts(self) -> None:
         """Save all output artifacts."""

@@ -100,6 +100,7 @@ def main(
                 console.print(f"[red]Unexpected error:[/red] {e}")
                 if not dry_run:  # Show traceback for debugging unless in dry run
                     import traceback
+
                     console.print(f"[dim]{traceback.format_exc()}[/dim]")
         exit_code = 1
 
