@@ -109,12 +109,14 @@ class TestLoadConfig:
     def test_load_with_explicit_path(self, tmp_path):
         """Test loading config with explicit path."""
         config_file = tmp_path / "custom.yaml"
-        config_data = {"models": ["gpt-4"], "defaults": {"parallel": 2}}
+        config_data = {"models": ["gpt-4"], "defaults": {"timeout": 180}}
         config_file.write_text(yaml.dump(config_data))
 
         config, files_used = load_config(str(config_file))
-        assert config.models == ["gpt-4"]
-        assert config.parallel == 2
+        assert len(config.models) == 1
+        assert config.models[0].name == "gpt-4"
+        assert config.models[0].options == []
+        assert config.timeout == 180
         assert files_used == [str(config_file)]
 
     def test_load_with_default_location(self, monkeypatch, tmp_path):
@@ -126,7 +128,9 @@ class TestLoadConfig:
         monkeypatch.setattr("nllm.config.CONFIG_FILES", [config_file])
 
         config, files_used = load_config()
-        assert config.models == ["claude-3-sonnet"]
+        assert len(config.models) == 1
+        assert config.models[0].name == "claude-3-sonnet"
+        assert config.models[0].options == []
         assert files_used == [str(config_file)]
 
     def test_load_no_config_file(self, monkeypatch, tmp_path):
@@ -167,15 +171,14 @@ class TestValidateConfig:
 
     def test_valid_config(self):
         """Test valid configuration."""
-        config = NllmConfig(parallel=4, timeout=120, retries=2, outdir="./out")
+        config = NllmConfig(timeout=120, retries=2, outdir="./out")
         # Should not raise
         validate_config(config)
 
     def test_invalid_parallel(self):
-        """Test invalid parallel value."""
-        config = NllmConfig(parallel=0)
-        with pytest.raises(ConfigError, match="parallel must be at least 1"):
-            validate_config(config)
+        """Test invalid parallel value - removed."""
+        # parallel attribute was removed, so this test is no longer relevant
+        pass
 
     def test_invalid_timeout(self):
         """Test invalid timeout value."""
@@ -201,31 +204,37 @@ class TestResolveModels:
 
     def test_cli_models_override_config(self):
         """Test that CLI models override config models."""
+        from nllm.models import ModelConfig
         cli_models = ["gpt-4", "claude-3-sonnet"]
-        config = NllmConfig(models=["gemini-pro"])
+        config = NllmConfig(models=[ModelConfig(name="gemini-pro", options=[])])
 
-        result = resolve_models(cli_models, config)
-        assert result == cli_models
+        result = resolve_models(cli_models, [], config)
+        assert len(result) == 2
+        assert result[0].name == "gpt-4"
+        assert result[1].name == "claude-3-sonnet"
+        assert all(model.options == [] for model in result)
 
     def test_use_config_models_when_no_cli(self):
         """Test using config models when no CLI models."""
-        config = NllmConfig(models=["gpt-4", "claude-3-sonnet"])
+        from nllm.models import ModelConfig
+        config = NllmConfig(models=[ModelConfig(name="gpt-4", options=[]), ModelConfig(name="claude-3-sonnet", options=[])])
 
-        result = resolve_models(None, config)
+        result = resolve_models(None, [], config)
         assert result == config.models
 
     def test_no_models_specified(self):
         """Test when no models specified anywhere."""
         config = NllmConfig(models=[])
 
-        result = resolve_models(None, config)
+        result = resolve_models(None, [], config)
         assert result == []
 
     def test_empty_cli_models_list(self):
         """Test empty CLI models list."""
-        config = NllmConfig(models=["gpt-4"])
+        from nllm.models import ModelConfig
+        config = NllmConfig(models=[ModelConfig(name="gpt-4", options=[])])
 
-        result = resolve_models([], config)
+        result = resolve_models([], [], config)
         assert result == []
 
 
@@ -234,9 +243,9 @@ class TestMergeCliConfig:
 
     def test_merge_all_options(self):
         """Test merging all CLI options."""
+        from nllm.models import ModelConfig
         base_config = NllmConfig(
-            models=["gpt-4"],
-            parallel=2,
+            models=[ModelConfig(name="gpt-4", options=[])],
             timeout=60,
             retries=1,
             stream=False,
@@ -246,15 +255,16 @@ class TestMergeCliConfig:
         merged = merge_cli_config(
             base_config,
             cli_models=["claude-3-sonnet"],
-            cli_parallel=4,
             cli_timeout=120,
             cli_retries=3,
             cli_stream=True,
             cli_outdir="./new",
         )
 
-        assert merged.models == ["claude-3-sonnet"]
-        assert merged.parallel == 4
+        assert len(merged.models) == 1
+        assert merged.models[0].name == "claude-3-sonnet"
+        assert merged.models[0].options == []
+        # parallel attribute was removed
         assert merged.timeout == 120
         assert merged.retries == 3
         assert merged.stream is True
@@ -262,23 +272,27 @@ class TestMergeCliConfig:
 
     def test_merge_partial_options(self):
         """Test merging partial CLI options."""
-        base_config = NllmConfig(models=["gpt-4"], parallel=2, timeout=60, retries=1)
+        from nllm.models import ModelConfig
+        base_config = NllmConfig(models=[ModelConfig(name="gpt-4", options=[])], timeout=60, retries=1)
 
-        merged = merge_cli_config(base_config, cli_parallel=8, cli_timeout=300)
+        merged = merge_cli_config(base_config, cli_timeout=300, cli_retries=5)
 
-        assert merged.models == ["gpt-4"]  # unchanged
-        assert merged.parallel == 8  # changed
+        assert len(merged.models) == 1
+        assert merged.models[0].name == "gpt-4"  # unchanged
         assert merged.timeout == 300  # changed
-        assert merged.retries == 1  # unchanged
+        assert merged.retries == 5  # changed
+        assert merged.stream == base_config.stream  # unchanged
 
     def test_merge_no_options(self):
         """Test merging with no CLI options."""
-        base_config = NllmConfig(models=["gpt-4"], parallel=2)
+        from nllm.models import ModelConfig
+        base_config = NllmConfig(models=[ModelConfig(name="gpt-4", options=[])], timeout=120)
 
         merged = merge_cli_config(base_config)
 
-        assert merged.models == base_config.models
-        assert merged.parallel == base_config.parallel
+        assert len(merged.models) == len(base_config.models)
+        assert merged.models[0].name == base_config.models[0].name
+        assert merged.timeout == base_config.timeout
 
 
 class TestCreateExampleConfig:
@@ -292,7 +306,7 @@ class TestCreateExampleConfig:
         assert "gpt-4" in config_text
         assert "claude-3-sonnet" in config_text
         assert "defaults:" in config_text
-        assert "parallel:" in config_text
+        # parallel attribute was removed from example config
         assert "timeout:" in config_text
 
         # Should be valid YAML
@@ -311,7 +325,7 @@ class TestGetDefaultConfig:
 
         assert isinstance(config, NllmConfig)
         assert config.models == []
-        assert config.parallel > 0
+        # parallel attribute was removed
         assert config.timeout > 0
         assert config.retries >= 0
         assert isinstance(config.stream, bool)

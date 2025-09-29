@@ -148,22 +148,28 @@ class TestRunNllm:
     @patch("nllm.app.check_llm_available")
     @patch("nllm.app.NllmExecutor")
     @patch("nllm.app.load_config")
-    def test_run_keyboard_interrupt(self, mock_load_config, mock_executor_class, mock_check_llm):
+    @patch("nllm.app.asyncio.run")
+    def test_run_keyboard_interrupt(self, mock_asyncio_run, mock_load_config, mock_executor_class, mock_check_llm):
         """Test nllm run with keyboard interrupt."""
+        import pytest
         from nllm.models import ModelConfig, NllmConfig
 
         config = NllmConfig(models=[ModelConfig(name="gpt-4", options=[])])
         mock_load_config.return_value = (config, [])
         mock_check_llm.return_value = (True, "0.10.0")
 
-        # Mock executor to raise KeyboardInterrupt
+        # Mock executor
         mock_executor = Mock()
-        mock_executor.execute_all.side_effect = KeyboardInterrupt()
+        mock_executor.get_exit_code.return_value = 1
+        mock_executor.results = []
         mock_executor_class.return_value = mock_executor
 
-        exit_code = run(cli_models=["gpt-4"], quiet=True)
+        # Mock asyncio.run to raise KeyboardInterrupt
+        mock_asyncio_run.side_effect = KeyboardInterrupt()
 
-        assert exit_code == 1
+        # The run function should re-raise KeyboardInterrupt
+        with pytest.raises(KeyboardInterrupt):
+            run(cli_models=["gpt-4"], quiet=True)
 
     def test_run_with_all_options(self, tmp_path):
         """Test nllm run with all CLI options."""
@@ -182,16 +188,16 @@ class TestRunNllm:
             mock_executor = Mock()
             mock_executor.execute_all.return_value = []
             mock_executor.get_exit_code.return_value = 0
+            mock_executor.results = []
             mock_executor_class.return_value = mock_executor
 
             # Mock asyncio.run
             mock_asyncio_run.return_value = []
 
-            exit_code = run(
+            result = run(
                 cli_models=["gpt-4", "claude-3-sonnet"],
                 config_path=str(tmp_path / "config.yaml"),
                 outdir=str(tmp_path / "output"),
-                parallel=8,
                 timeout=300,
                 retries=2,
                 stream=False,
@@ -201,11 +207,10 @@ class TestRunNllm:
                 llm_args=["-t", "0.7", "Hello world"],
             )
 
-            assert exit_code == 0
+            assert result.exit_code == 0
 
             # Check that config was merged with CLI args
             call_args = mock_executor_class.call_args[0][0]  # ExecutionContext
-            assert call_args.config.parallel == 8
             assert call_args.config.timeout == 300
             assert call_args.config.retries == 2
             assert call_args.config.stream is False
@@ -223,7 +228,6 @@ class TestBuildCliArgs:
             cli_model_options=None,
             config_path=None,
             outdir=None,
-            parallel=None,
             timeout=None,
             retries=None,
             stream=None,
@@ -242,7 +246,6 @@ class TestBuildCliArgs:
             cli_model_options=None,
             config_path=None,
             outdir=None,
-            parallel=None,
             timeout=None,
             retries=None,
             stream=None,
@@ -259,9 +262,9 @@ class TestBuildCliArgs:
         """Test building CLI args with all options."""
         args = _build_cli_args(
             cli_models=["gpt-4"],
+            cli_model_options=None,
             config_path="/path/to/config.yaml",
             outdir="/output",
-            parallel=8,
             timeout=300,
             retries=2,
             stream=True,
@@ -279,8 +282,6 @@ class TestBuildCliArgs:
             "/path/to/config.yaml",
             "-o",
             "/output",
-            "--parallel",
-            "8",
             "--timeout",
             "300",
             "--retries",
@@ -302,7 +303,6 @@ class TestBuildCliArgs:
             cli_model_options=None,
             config_path=None,
             outdir=None,
-            parallel=None,
             timeout=None,
             retries=None,
             stream=False,
@@ -322,7 +322,6 @@ class TestBuildCliArgs:
             cli_model_options=None,
             config_path=None,
             outdir=None,
-            parallel=None,
             timeout=None,
             retries=None,
             stream=None,

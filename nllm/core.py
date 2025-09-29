@@ -326,7 +326,7 @@ class NllmExecutor:
             raise ExecutionError("No models specified")
 
         # Create semaphore for concurrency control
-        semaphore = asyncio.Semaphore(self.context.config.parallel)
+        semaphore = asyncio.Semaphore(4)  # Default parallel execution
 
         async def run_single_model(model_config: ModelConfig) -> ModelResult:
             async with semaphore:
@@ -342,7 +342,7 @@ class NllmExecutor:
             }
 
         # Create semaphore for concurrency control
-        semaphore = asyncio.Semaphore(self.context.config.parallel)
+        semaphore = asyncio.Semaphore(4)  # Default parallel execution
 
         # Execute all models with live progress
         if not self.context.quiet and not self.context.dry_run:
