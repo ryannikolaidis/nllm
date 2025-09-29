@@ -9,7 +9,6 @@ import yaml
 from .constants import (
     CONFIG_FILES,
     DEFAULT_OUTDIR,
-    DEFAULT_PARALLEL,
     DEFAULT_RETRIES,
     DEFAULT_STREAM,
     DEFAULT_TIMEOUT,
@@ -79,9 +78,6 @@ def load_config(explicit_path: str | None = None) -> tuple[NllmConfig, list[str]
 
 def validate_config(config: NllmConfig) -> None:
     """Validate configuration values."""
-    if config.parallel < 1:
-        raise ConfigError("parallel must be at least 1")
-
     if config.timeout < 1:
         raise ConfigError("timeout must be at least 1 second")
 
@@ -108,7 +104,6 @@ models:
 
 # Default settings
 defaults:
-  parallel: 3          # Maximum concurrent models
   timeout: 120         # Per-model timeout in seconds
   retries: 0          # Per-model retries for transient errors
   stream: true        # Stream outputs to console
@@ -193,7 +188,6 @@ def merge_cli_config(
     config: NllmConfig,
     cli_models: list[str] | None = None,
     cli_model_options: list[str] | None = None,
-    cli_parallel: int | None = None,
     cli_timeout: int | None = None,
     cli_retries: int | None = None,
     cli_stream: bool | None = None,
@@ -205,7 +199,6 @@ def merge_cli_config(
 
     return config.merge_cli_args(
         models=resolved_models,
-        parallel=cli_parallel,
         timeout=cli_timeout,
         retries=cli_retries,
         stream=cli_stream,
@@ -226,7 +219,6 @@ def get_default_config() -> NllmConfig:
     """Get a configuration with hardcoded defaults."""
     return NllmConfig(
         models=[],
-        parallel=DEFAULT_PARALLEL,
         timeout=DEFAULT_TIMEOUT,
         retries=DEFAULT_RETRIES,
         stream=DEFAULT_STREAM,

@@ -146,7 +146,6 @@ class NllmConfig:
     """Configuration for nllm runs."""
 
     models: list[ModelConfig] = field(default_factory=list)
-    parallel: int = 4
     timeout: int = 120
     retries: int = 0
     stream: bool = True
@@ -180,7 +179,6 @@ class NllmConfig:
 
         return cls(
             models=models,
-            parallel=data.get("defaults", {}).get("parallel", 4),
             timeout=data.get("defaults", {}).get("timeout", 120),
             retries=data.get("defaults", {}).get("retries", 0),
             stream=data.get("defaults", {}).get("stream", True),
@@ -191,7 +189,6 @@ class NllmConfig:
     def merge_cli_args(
         self,
         models: list[ModelConfig] | None = None,
-        parallel: int | None = None,
         timeout: int | None = None,
         retries: int | None = None,
         stream: bool | None = None,
@@ -200,7 +197,6 @@ class NllmConfig:
         """Create new config with CLI arguments merged in."""
         return NllmConfig(
             models=models if models is not None else self.models,
-            parallel=parallel if parallel is not None else self.parallel,
             timeout=timeout if timeout is not None else self.timeout,
             retries=retries if retries is not None else self.retries,
             stream=stream if stream is not None else self.stream,

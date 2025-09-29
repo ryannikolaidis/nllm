@@ -4,7 +4,6 @@ import os
 from pathlib import Path
 
 # Default configuration values
-DEFAULT_PARALLEL = min(4, os.cpu_count() or 4)
 DEFAULT_TIMEOUT = 120  # seconds
 DEFAULT_RETRIES = 0
 DEFAULT_STREAM = True
@@ -64,7 +63,6 @@ Examples:
 MODEL_HELP = "Model to use (repeatable). Overrides config file if specified."
 CONFIG_HELP = "Path to config file (default: ./.nllm-config.yaml or ~/.nllm/config.yaml)"
 OUTDIR_HELP = "Output directory for results (default: ./nllm-runs/<timestamp>)"
-PARALLEL_HELP = f"Maximum concurrent models (default: {DEFAULT_PARALLEL})"
 TIMEOUT_HELP = f"Per-model timeout in seconds (default: {DEFAULT_TIMEOUT})"
 RETRIES_HELP = f"Per-model retries for transient errors (default: {DEFAULT_RETRIES})"
 STREAM_HELP = "Stream model outputs to console as they arrive (default: true)"

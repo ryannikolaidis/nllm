@@ -25,7 +25,6 @@ def run(
     cli_model_options: list[str] | None = None,
     config_path: str | None = None,
     outdir: str | None = None,
-    parallel: int | None = None,
     timeout: int | None = None,
     retries: int | None = None,
     stream: bool | None = None,
@@ -53,7 +52,6 @@ def run(
             config,
             cli_models=cli_models,
             cli_model_options=cli_model_options,
-            cli_parallel=parallel,
             cli_timeout=timeout,
             cli_retries=retries,
             cli_stream=stream,
@@ -99,7 +97,6 @@ def run(
                 cli_model_options,
                 config_path,
                 outdir,
-                parallel,
                 timeout,
                 retries,
                 stream,
@@ -167,7 +164,6 @@ def _build_cli_args(
     cli_model_options: list[str] | None,
     config_path: str | None,
     outdir: str | None,
-    parallel: int | None,
     timeout: int | None,
     retries: int | None,
     stream: bool | None,
@@ -193,8 +189,6 @@ def _build_cli_args(
     if outdir:
         args.extend(["-o", outdir])
 
-    if parallel is not None:
-        args.extend(["--parallel", str(parallel)])
 
     if timeout is not None:
         args.extend(["--timeout", str(timeout)])
