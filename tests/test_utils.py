@@ -615,3 +615,58 @@ And some more text."""
         text = 'The result is `{"status": "ok"}` for this test.'
         result = extract_json_from_text(text)
         assert result == {"status": "ok"}
+
+    def test_raw_json_without_markdown(self):
+        """Test extracting raw JSON without any markdown formatting."""
+        text = '''
+        {
+          "analysis": "complete",
+          "score": 95,
+          "recommendations": ["fix typo", "add tests"]
+        }
+        '''
+        result = extract_json_from_text(text)
+        assert result == {
+            "analysis": "complete",
+            "score": 95,
+            "recommendations": ["fix typo", "add tests"]
+        }
+
+    def test_mixed_code_blocks_finds_json(self):
+        """Test that JSON is found even when mixed with other code blocks."""
+        text = '''First, here's some YAML:
+
+```yaml
+name: test
+version: 1.0
+```
+
+Then the JSON result:
+
+```
+{"outcome": "passed", "duration": "2.5s"}
+```
+
+And some Python:
+
+```python
+print("hello")
+```'''
+        result = extract_json_from_text(text)
+        assert result == {"outcome": "passed", "duration": "2.5s"}
+
+    def test_json_array_without_language_specifier(self):
+        """Test extracting JSON array from code block without language."""
+        text = '''The issues are:
+
+```
+[
+  {"id": 1, "severity": "high"},
+  {"id": 2, "severity": "low"}
+]
+```'''
+        result = extract_json_from_text(text)
+        assert result == [
+            {"id": 1, "severity": "high"},
+            {"id": 2, "severity": "low"}
+        ]
