@@ -149,9 +149,12 @@ class TestRunNllm:
     @patch("nllm.app.NllmExecutor")
     @patch("nllm.app.load_config")
     @patch("nllm.app.asyncio.run")
-    def test_run_keyboard_interrupt(self, mock_asyncio_run, mock_load_config, mock_executor_class, mock_check_llm):
+    def test_run_keyboard_interrupt(
+        self, mock_asyncio_run, mock_load_config, mock_executor_class, mock_check_llm
+    ):
         """Test nllm run with keyboard interrupt."""
         import pytest
+
         from nllm.models import ModelConfig, NllmConfig
 
         config = NllmConfig(models=[ModelConfig(name="gpt-4", options=[])])

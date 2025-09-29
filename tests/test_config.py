@@ -205,6 +205,7 @@ class TestResolveModels:
     def test_cli_models_override_config(self):
         """Test that CLI models override config models."""
         from nllm.models import ModelConfig
+
         cli_models = ["gpt-4", "claude-3-sonnet"]
         config = NllmConfig(models=[ModelConfig(name="gemini-pro", options=[])])
 
@@ -217,7 +218,13 @@ class TestResolveModels:
     def test_use_config_models_when_no_cli(self):
         """Test using config models when no CLI models."""
         from nllm.models import ModelConfig
-        config = NllmConfig(models=[ModelConfig(name="gpt-4", options=[]), ModelConfig(name="claude-3-sonnet", options=[])])
+
+        config = NllmConfig(
+            models=[
+                ModelConfig(name="gpt-4", options=[]),
+                ModelConfig(name="claude-3-sonnet", options=[]),
+            ]
+        )
 
         result = resolve_models(None, [], config)
         assert result == config.models
@@ -232,6 +239,7 @@ class TestResolveModels:
     def test_empty_cli_models_list(self):
         """Test empty CLI models list."""
         from nllm.models import ModelConfig
+
         config = NllmConfig(models=[ModelConfig(name="gpt-4", options=[])])
 
         result = resolve_models([], [], config)
@@ -244,6 +252,7 @@ class TestMergeCliConfig:
     def test_merge_all_options(self):
         """Test merging all CLI options."""
         from nllm.models import ModelConfig
+
         base_config = NllmConfig(
             models=[ModelConfig(name="gpt-4", options=[])],
             timeout=60,
@@ -273,7 +282,10 @@ class TestMergeCliConfig:
     def test_merge_partial_options(self):
         """Test merging partial CLI options."""
         from nllm.models import ModelConfig
-        base_config = NllmConfig(models=[ModelConfig(name="gpt-4", options=[])], timeout=60, retries=1)
+
+        base_config = NllmConfig(
+            models=[ModelConfig(name="gpt-4", options=[])], timeout=60, retries=1
+        )
 
         merged = merge_cli_config(base_config, cli_timeout=300, cli_retries=5)
 
@@ -286,6 +298,7 @@ class TestMergeCliConfig:
     def test_merge_no_options(self):
         """Test merging with no CLI options."""
         from nllm.models import ModelConfig
+
         base_config = NllmConfig(models=[ModelConfig(name="gpt-4", options=[])], timeout=120)
 
         merged = merge_cli_config(base_config)

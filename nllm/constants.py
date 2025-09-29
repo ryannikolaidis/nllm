@@ -1,6 +1,5 @@
 """Constants and defaults for nllm."""
 
-import os
 from pathlib import Path
 
 # Default configuration values

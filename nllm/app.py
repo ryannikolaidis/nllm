@@ -189,7 +189,6 @@ def _build_cli_args(
     if outdir:
         args.extend(["-o", outdir])
 
-
     if timeout is not None:
         args.extend(["--timeout", str(timeout)])
 
