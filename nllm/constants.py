@@ -83,10 +83,10 @@ SUCCESS_PARTIAL = "{success} of {total} models completed successfully"
 SUCCESS_ARTIFACTS = "Artifacts saved to: {path}"
 
 # Status indicators (for rich console output)
-STATUS_SUCCESS = "✓"
-STATUS_ERROR = "✗"
-STATUS_TIMEOUT = "⏰"
-STATUS_RUNNING = "⟳"
+STATUS_SUCCESS = "SUCCESS"
+STATUS_ERROR = "ERROR"
+STATUS_TIMEOUT = "TIMEOUT"
+STATUS_RUNNING = "RUNNING"
 
 # Streaming prefixes
 MODEL_PREFIX_FORMAT = "[{model}]"

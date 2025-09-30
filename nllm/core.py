@@ -6,20 +6,13 @@ import time
 from pathlib import Path
 
 from rich.console import Console
-from rich.live import Live
 from rich.panel import Panel
-from rich.table import Table
-from rich.text import Text
 
 from .constants import (
     DRY_RUN_PREFIX,
     MANIFEST_FILE,
     MODEL_PREFIX_FORMAT,
     RESULTS_JSONL_FILE,
-    STATUS_ERROR,
-    STATUS_RUNNING,
-    STATUS_SUCCESS,
-    STATUS_TIMEOUT,
 )
 from .models import ExecutionContext, ModelConfig, ModelResult
 from .utils import (
@@ -27,7 +20,6 @@ from .utils import (
     classify_error,
     construct_llm_command,
     extract_json_from_text,
-    format_duration,
     redact_secrets_from_args,
     retry_with_backoff,
     sanitize_filename,
@@ -331,9 +323,11 @@ class NllmExecutor:
         if not models:
             raise ExecutionError("No models specified")
 
-        # Write initial information immediately
+        # Write initial information immediately and show output directory
         if not self.context.dry_run:
             await self._save_initial_info()
+            # Always show output directory immediately (core streaming feature)
+            self.console.print(f"\nOutput directory: [cyan]{self.context.output_dir}[/cyan]")
 
         # Create semaphore for concurrency control
         semaphore = asyncio.Semaphore(4)  # Default parallel execution
@@ -354,26 +348,24 @@ class NllmExecutor:
         # Create semaphore for concurrency control
         semaphore = asyncio.Semaphore(4)  # Default parallel execution
 
-        # Execute all models with live progress
-        if not self.context.quiet and not self.context.dry_run:
-            # Use a lock to prevent concurrent updates
-            update_lock = asyncio.Lock()
-            with Live(self._create_progress_table(), refresh_per_second=1) as live:
-                tasks = [
-                    self._run_single_model_with_progress(model, live, semaphore, update_lock)
-                    for model in models
-                ]
-                self.results = await asyncio.gather(*tasks, return_exceptions=False)
-        else:
-            async def run_and_save(model_config):
-                """Run model and save result immediately."""
-                executor = ModelExecutor(model_config, self.context, self.console, suppress_streaming=True)
-                result = await executor.execute()
-                await self._save_single_result(result)
-                return result
+        # Show models to execute
+        if not self.context.dry_run:
+            self.console.print(f"Models to execute: [yellow]{', '.join([m.name for m in self.context.config.models])}[/yellow]\n")
 
-            tasks = [run_and_save(model) for model in models]
-            self.results = await asyncio.gather(*tasks, return_exceptions=False)
+        # Execute all models with simple progress indication
+        async def run_and_save(model_config):
+            """Run model and save result immediately with simple progress."""
+            # Show start message
+            if not self.context.dry_run:
+                self.console.print(f"[dim]Starting {model_config.name}...[/dim]")
+
+            executor = ModelExecutor(model_config, self.context, self.console, suppress_streaming=True)
+            result = await executor.execute()
+            await self._save_single_result(result)
+            return result
+
+        tasks = [run_and_save(model) for model in models]
+        self.results = await asyncio.gather(*tasks, return_exceptions=False)
 
         # Save final artifacts (manifest and summary files)
         if not self.context.dry_run:
@@ -381,73 +373,9 @@ class NllmExecutor:
 
         return self.results
 
-    def _create_progress_table(self) -> Table:
-        """Create live progress table."""
-        table = Table(title="Model Execution Progress", show_lines=True)
-        table.add_column("Model", style="cyan", no_wrap=True)
-        table.add_column("Status", justify="center", min_width=20)
-        table.add_column("Duration", justify="right", min_width=10)
-
-        for model, status in self.model_status.items():
-            if status["status"] == "running":
-                status_text = Text(f"{STATUS_RUNNING} Running...", style="yellow")
-            elif status["status"] == "completed":
-                status_text = Text(f"{STATUS_SUCCESS} Completed", style="green")
-            elif status["status"] == "timeout":
-                status_text = Text(f"{STATUS_TIMEOUT} Timeout", style="red")
-            else:
-                status_text = Text(f"{STATUS_ERROR} Error", style="red")
-
-            table.add_row(model, status_text, status["duration"])
-
-        return table
-
-    async def _run_single_model_with_progress(
-        self, model_config: ModelConfig, live, semaphore, update_lock
-    ) -> ModelResult:
-        """Run a single model and update progress table."""
-        async with semaphore:
-            executor = ModelExecutor(
-                model_config, self.context, self.console, suppress_streaming=True
-            )
-            result = await executor.execute()
-
-            # Write result to disk immediately
-            await self._save_single_result(result)
-
-            # Update status based on result (with lock to prevent concurrent updates)
-            async with update_lock:
-                if result.status == "ok":
-                    self.model_status[model_config.name] = {
-                        "status": "completed",
-                        "duration": format_duration(result.duration_ms),
-                        "result_file": f"results/{sanitize_filename(model_config.name)}.json",
-                    }
-                elif result.status == "timeout":
-                    self.model_status[model_config.name] = {
-                        "status": "timeout",
-                        "duration": format_duration(result.duration_ms),
-                        "result_file": "",
-                    }
-                else:
-                    self.model_status[model_config.name] = {
-                        "status": "error",
-                        "duration": format_duration(result.duration_ms),
-                        "result_file": "",
-                    }
-
-                # Update the live display
-                live.update(self._create_progress_table())
-
-            return result
 
     async def _save_initial_info(self) -> None:
         """Save initial run information immediately."""
-        # Print output directory info
-        if not self.context.quiet:
-            self.console.print(f"\n📁 Output directory: [cyan]{self.context.output_dir}[/cyan]")
-            self.console.print(f"📋 Models to execute: [yellow]{', '.join([m.name for m in self.context.config.models])}[/yellow]")
-
         # Create results JSONL file (empty initially)
         results_path = self.context.output_dir / RESULTS_JSONL_FILE
         results_path.touch()
@@ -456,7 +384,7 @@ class NllmExecutor:
         manifest_path = self.context.output_dir / MANIFEST_FILE
         save_json_safely(self.context.manifest.to_dict(), manifest_path)
 
-    async def _save_single_result(self, result: ModelResult) -> None:
+    async def _save_single_result(self, result: ModelResult, show_completion: bool = True) -> None:
         """Save a single model result immediately."""
         if self.context.dry_run:
             return
@@ -471,10 +399,13 @@ class NllmExecutor:
         with results_path.open("a", encoding="utf-8") as f:
             f.write(json.dumps(result.to_dict()) + "\n")
 
-        # Print immediate completion notice
-        if not self.context.quiet:
-            status_icon = "✅" if result.status == "ok" else "❌"
-            self.console.print(f"{status_icon} [cyan]{result.model}[/cyan] completed - result saved")
+        # Print immediate completion notice with result path and duration (always show - core streaming feature)
+        if show_completion:
+            from .utils import format_duration
+            status_icon = "SUCCESS" if result.status == "ok" else "FAILED"
+            result_path = results_dir / f"{sanitize_filename(result.model)}.json"
+            duration_str = format_duration(result.duration_ms)
+            self.console.print(f"[cyan]{result.model}[/cyan] {status_icon} ({duration_str}) - result saved to [green]{result_path}[/green]")
 
     async def _save_final_artifacts(self) -> None:
         """Save final artifacts after all models complete."""
@@ -491,10 +422,10 @@ class NllmExecutor:
         total_count = len(self.results)
 
         if success_count == total_count:
-            message = f"✓ All {total_count} models completed successfully"
+            message = f"All {total_count} models completed successfully"
             style = "green"
         else:
-            message = f"⚠ {success_count} of {total_count} models completed successfully"
+            message = f"WARNING: {success_count} of {total_count} models completed successfully"
             style = "yellow"
 
         if not self.context.dry_run and not self.context.using_temp_dir:

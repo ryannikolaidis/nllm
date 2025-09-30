@@ -347,10 +347,21 @@ Each line in `results.jsonl` and individual result files:
 
 nllm writes results incrementally for immediate feedback:
 
-1. **Immediate setup**: Output directory and command information are written as soon as execution starts
-2. **Per-model completion**: Each model's results are saved immediately when that model finishes
-3. **Visual feedback**: Console shows ✅/❌ completion indicators as models finish
+1. **Immediate setup**: Output directory is displayed immediately when execution starts
+2. **Per-model completion**: Each model's results are saved to disk as soon as that model finishes
+3. **Visual feedback**: Console shows SUCCESS/FAILED completion indicators with full result paths
 4. **Parallel access**: Results can be accessed while other models are still running
+
+Example output:
+```
+Output directory: /tmp/nllm-out/2025-01-01_12-30-45
+Models to execute: gpt-4, claude-3-sonnet
+
+gpt-4 SUCCESS - result saved to /tmp/nllm-out/2025-01-01_12-30-45/results/gpt-4.json
+claude-3-sonnet SUCCESS - result saved to /tmp/nllm-out/2025-01-01_12-30-45/results/claude-3-sonnet.json
+
+[Live Progress Table shows completion status]
+```
 
 This allows monitoring progress and accessing results during long-running multi-model executions.
 
