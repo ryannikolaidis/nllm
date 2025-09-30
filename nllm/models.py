@@ -146,7 +146,7 @@ class NllmConfig:
     """Configuration for nllm runs."""
 
     models: list[ModelConfig] = field(default_factory=list)
-    timeout: int = 120
+    timeout: int | None = None
     retries: int = 0
     stream: bool = True
     outdir: str = "./nllm-runs"
@@ -179,7 +179,7 @@ class NllmConfig:
 
         return cls(
             models=models,
-            timeout=data.get("defaults", {}).get("timeout", 120),
+            timeout=data.get("defaults", {}).get("timeout", None),
             retries=data.get("defaults", {}).get("retries", 0),
             stream=data.get("defaults", {}).get("stream", True),
             outdir=data.get("defaults", {}).get("outdir", "./nllm-runs"),

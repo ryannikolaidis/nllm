@@ -171,7 +171,7 @@ class TestValidateConfig:
 
     def test_valid_config(self):
         """Test valid configuration."""
-        config = NllmConfig(timeout=120, retries=2, outdir="./out")
+        config = NllmConfig(timeout=300, retries=2, outdir="./out")
         # Should not raise
         validate_config(config)
 
@@ -264,7 +264,7 @@ class TestMergeCliConfig:
         merged = merge_cli_config(
             base_config,
             cli_models=["claude-3-sonnet"],
-            cli_timeout=120,
+            cli_timeout=300,
             cli_retries=3,
             cli_stream=True,
             cli_outdir="./new",
@@ -274,7 +274,7 @@ class TestMergeCliConfig:
         assert merged.models[0].name == "claude-3-sonnet"
         assert merged.models[0].options == []
         # parallel attribute was removed
-        assert merged.timeout == 120
+        assert merged.timeout == 300
         assert merged.retries == 3
         assert merged.stream is True
         assert merged.outdir == "./new"
@@ -299,7 +299,7 @@ class TestMergeCliConfig:
         """Test merging with no CLI options."""
         from nllm.models import ModelConfig
 
-        base_config = NllmConfig(models=[ModelConfig(name="gpt-4", options=[])], timeout=120)
+        base_config = NllmConfig(models=[ModelConfig(name="gpt-4", options=[])], timeout=300)
 
         merged = merge_cli_config(base_config)
 
@@ -320,7 +320,7 @@ class TestCreateExampleConfig:
         assert "claude-3-sonnet" in config_text
         assert "defaults:" in config_text
         # parallel attribute was removed from example config
-        assert "timeout:" in config_text
+        assert "retries:" in config_text
 
         # Should be valid YAML
         config_data = yaml.safe_load(config_text)
@@ -339,7 +339,7 @@ class TestGetDefaultConfig:
         assert isinstance(config, NllmConfig)
         assert config.models == []
         # parallel attribute was removed
-        assert config.timeout > 0
+        assert config.timeout is None  # No timeout by default
         assert config.retries >= 0
         assert isinstance(config.stream, bool)
         assert config.outdir

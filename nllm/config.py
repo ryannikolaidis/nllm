@@ -78,8 +78,8 @@ def load_config(explicit_path: str | None = None) -> tuple[NllmConfig, list[str]
 
 def validate_config(config: NllmConfig) -> None:
     """Validate configuration values."""
-    if config.timeout < 1:
-        raise ConfigError("timeout must be at least 1 second")
+    if config.timeout is not None and config.timeout < 1:
+        raise ConfigError("timeout must be at least 1 second if specified")
 
     if config.retries < 0:
         raise ConfigError("retries cannot be negative")
@@ -104,7 +104,6 @@ models:
 
 # Default settings
 defaults:
-  timeout: 120         # Per-model timeout in seconds
   retries: 0          # Per-model retries for transient errors
   stream: true        # Stream outputs to console
   outdir: "./nllm-out"  # Base output directory

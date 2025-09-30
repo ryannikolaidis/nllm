@@ -136,11 +136,17 @@ class ModelExecutor:
             stderr_file = stderr_path.open("w", encoding="utf-8")
 
         try:
-            # Run with timeout
-            stdout_data, stderr_data = await asyncio.wait_for(
-                self._stream_output(process, stdout_file, stderr_file),
-                timeout=self.context.config.timeout,
-            )
+            # Run with timeout (if specified)
+            if self.context.config.timeout is not None:
+                stdout_data, stderr_data = await asyncio.wait_for(
+                    self._stream_output(process, stdout_file, stderr_file),
+                    timeout=self.context.config.timeout,
+                )
+            else:
+                # No timeout - run indefinitely
+                stdout_data, stderr_data = await self._stream_output(
+                    process, stdout_file, stderr_file
+                )
 
             # Wait for process to complete
             exit_code = await process.wait()
@@ -258,7 +264,7 @@ class ModelExecutor:
             exit_code=-1,
             text="",
             command=command,
-            stderr_tail=f"Timeout after {self.context.config.timeout} seconds",
+            stderr_tail=f"Timeout after {self.context.config.timeout or 'unknown'} seconds",
             meta={"timeout": True},
         )
 

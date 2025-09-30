@@ -254,7 +254,7 @@ class TestNllmConfig:
 
         assert config.models == []
         # parallel attribute was removed
-        assert config.timeout == 120
+        assert config.timeout is None
         assert config.retries == 0
         assert config.stream is True
         assert config.outdir == "./nllm-runs"
@@ -315,7 +315,7 @@ class TestNllmConfig:
         # Should use all defaults
         assert config.models == []
         # parallel attribute was removed
-        assert config.timeout == 120
+        assert config.timeout is None
 
     def test_merge_cli_args_all(self):
         """Test merging all CLI arguments."""
@@ -349,7 +349,7 @@ class TestNllmConfig:
 
     def test_merge_cli_args_partial(self):
         """Test merging partial CLI arguments."""
-        config = NllmConfig(models=["gpt-4"], timeout=120)
+        config = NllmConfig(models=["gpt-4"], timeout=300)
 
         merged = config.merge_cli_args(timeout=240)
 
@@ -359,7 +359,7 @@ class TestNllmConfig:
 
     def test_merge_cli_args_none(self):
         """Test merging when no CLI arguments provided."""
-        config = NllmConfig(models=["gpt-4"], timeout=120)
+        config = NllmConfig(models=["gpt-4"], timeout=300)
 
         merged = config.merge_cli_args()
 

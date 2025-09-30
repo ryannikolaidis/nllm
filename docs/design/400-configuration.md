@@ -70,7 +70,6 @@ models:
 
 # Default execution settings
 defaults:
-  timeout: 120          # Per-model timeout in seconds
   retries: 1           # Retry attempts for transient failures
   stream: true         # Enable streaming output
   outdir: "./my-runs"  # Output directory
@@ -93,7 +92,7 @@ The YAML structure maps to the following Python data models:
 @dataclass
 class NllmConfig:
     models: list[ModelConfig] = field(default_factory=list)
-    timeout: int = 120
+    timeout: int | None = None
     retries: int = 0
     stream: bool = True
     outdir: str = "./nllm-runs"
@@ -221,7 +220,7 @@ llm -m gpt-4 -o temperature 0.5 --system "Be helpful" "Hello"
 ### Built-in Defaults
 
 ```python
-DEFAULT_TIMEOUT = 120      # seconds
+DEFAULT_TIMEOUT = None     # No timeout by default
 DEFAULT_RETRIES = 0        # no retries by default
 DEFAULT_STREAM = True      # enable streaming
 DEFAULT_OUTDIR = "./nllm-runs"  # output directory
@@ -522,7 +521,6 @@ models:
   - "gemini-pro"
 
 defaults:
-  timeout: 120
   outdir: "~/nllm-results"
 EOF
 ```

@@ -159,7 +159,7 @@ nllm [OPTIONS] -- [PROMPT and/or llm passthrough args]
 | `--model-option` | Per-model options in format `model:option1:option2:...` (repeatable) |
 | `-c, --config` | Path to config file (default: `./.nllm-config.yaml` or `~/.nllm/config.yaml`) |
 | `-o, --outdir` | Output directory for results (default: `./nllm-runs/<timestamp>`) |
-| `--timeout SECONDS` | Per-model timeout in seconds (default: 120) |
+| `--timeout SECONDS` | Per-model timeout in seconds (default: no timeout) |
 | `--retries N` | Per-model retries for transient errors (default: 0) |
 | `--stream/--no-stream` | Stream model outputs to console (default: `--stream`) |
 | `--raw` | Save raw stdout/stderr files in addition to parsed content |
@@ -212,7 +212,6 @@ models:
     options: ["-o", "temperature", "0.8"]
 
 defaults:
-  timeout: 120
   retries: 1
   stream: true
   outdir: "./my-nllm-runs"
@@ -384,7 +383,7 @@ models:
 
 # Default behavior settings
 defaults:
-  timeout: 120      # Per-model timeout (seconds)
+  # timeout: 300  # Optional: per-model timeout in seconds (default: no timeout)      # Per-model timeout (seconds)
   retries: 0        # Per-model retries for transient errors
   stream: true      # Stream outputs to console
   outdir: "./nllm-runs"  # Base output directory
@@ -410,7 +409,7 @@ models:
     options: ["--system", "You are helpful"]
 
 defaults:
-  timeout: 180
+  timeout: 180  # Set timeout when needed
   retries: 1
 EOF
 

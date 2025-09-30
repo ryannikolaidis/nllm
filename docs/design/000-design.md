@@ -74,8 +74,6 @@ models:
   - "gemini-pro"
 
 defaults:
-  parallel: 3
-  timeout: 120
   retries: 0
   stream: true
   outdir: "./prompter-runs"

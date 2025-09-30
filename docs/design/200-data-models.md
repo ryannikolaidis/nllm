@@ -169,7 +169,7 @@ Main configuration class containing all execution parameters.
 @dataclass
 class NllmConfig:
     models: list[ModelConfig] = field(default_factory=list)  # Models to execute
-    timeout: int = 120                          # Per-model timeout (seconds)
+    timeout: int | None = None                  # Per-model timeout (seconds, optional)
     retries: int = 0                           # Retry attempts for transient errors
     stream: bool = True                        # Enable streaming output
     outdir: str = "./nllm-runs"               # Base output directory
@@ -205,7 +205,7 @@ def from_dict(cls, data: dict[str, Any]) -> NllmConfig:
 
     return cls(
         models=models,
-        timeout=data.get("defaults", {}).get("timeout", 120),
+        timeout=data.get("defaults", {}).get("timeout", None),
         retries=data.get("defaults", {}).get("retries", 0),
         stream=data.get("defaults", {}).get("stream", True),
         outdir=data.get("defaults", {}).get("outdir", "./nllm-runs"),

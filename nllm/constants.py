@@ -3,7 +3,7 @@
 from pathlib import Path
 
 # Default configuration values
-DEFAULT_TIMEOUT = 120  # seconds
+DEFAULT_TIMEOUT = None  # No timeout by default
 DEFAULT_RETRIES = 0
 DEFAULT_STREAM = True
 DEFAULT_OUTDIR = "./nllm-runs"
@@ -62,7 +62,7 @@ Examples:
 MODEL_HELP = "Model to use (repeatable). Overrides config file if specified."
 CONFIG_HELP = "Path to config file (default: ./.nllm-config.yaml or ~/.nllm/config.yaml)"
 OUTDIR_HELP = "Output directory for results (default: ./nllm-runs/<timestamp>)"
-TIMEOUT_HELP = f"Per-model timeout in seconds (default: {DEFAULT_TIMEOUT})"
+TIMEOUT_HELP = "Per-model timeout in seconds (default: no timeout)"
 RETRIES_HELP = f"Per-model retries for transient errors (default: {DEFAULT_RETRIES})"
 STREAM_HELP = "Stream model outputs to console as they arrive (default: true)"
 RAW_HELP = "Save raw stdout/stderr files in addition to parsed content"
