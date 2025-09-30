@@ -331,6 +331,10 @@ class NllmExecutor:
         if not models:
             raise ExecutionError("No models specified")
 
+        # Write initial information immediately
+        if not self.context.dry_run:
+            await self._save_initial_info()
+
         # Create semaphore for concurrency control
         semaphore = asyncio.Semaphore(4)  # Default parallel execution
 
@@ -361,12 +365,19 @@ class NllmExecutor:
                 ]
                 self.results = await asyncio.gather(*tasks, return_exceptions=False)
         else:
-            tasks = [run_single_model(model) for model in models]
+            async def run_and_save(model_config):
+                """Run model and save result immediately."""
+                executor = ModelExecutor(model_config, self.context, self.console, suppress_streaming=True)
+                result = await executor.execute()
+                await self._save_single_result(result)
+                return result
+
+            tasks = [run_and_save(model) for model in models]
             self.results = await asyncio.gather(*tasks, return_exceptions=False)
 
-        # Save artifacts
+        # Save final artifacts (manifest and summary files)
         if not self.context.dry_run:
-            await self._save_artifacts()
+            await self._save_final_artifacts()
 
         return self.results
 
@@ -401,6 +412,9 @@ class NllmExecutor:
             )
             result = await executor.execute()
 
+            # Write result to disk immediately
+            await self._save_single_result(result)
+
             # Update status based on result (with lock to prevent concurrent updates)
             async with update_lock:
                 if result.status == "ok":
@@ -427,23 +441,46 @@ class NllmExecutor:
 
             return result
 
-    async def _save_artifacts(self) -> None:
-        """Save all output artifacts."""
-        # Save manifest
+    async def _save_initial_info(self) -> None:
+        """Save initial run information immediately."""
+        # Print output directory info
+        if not self.context.quiet:
+            self.console.print(f"\n📁 Output directory: [cyan]{self.context.output_dir}[/cyan]")
+            self.console.print(f"📋 Models to execute: [yellow]{', '.join([m.name for m in self.context.config.models])}[/yellow]")
+
+        # Create results JSONL file (empty initially)
+        results_path = self.context.output_dir / RESULTS_JSONL_FILE
+        results_path.touch()
+
+        # Save initial manifest with command info
         manifest_path = self.context.output_dir / MANIFEST_FILE
         save_json_safely(self.context.manifest.to_dict(), manifest_path)
 
-        # Save results JSONL
-        results_path = self.context.output_dir / RESULTS_JSONL_FILE
-        with results_path.open("w", encoding="utf-8") as f:
-            for result in self.results:
-                f.write(json.dumps(result.to_dict()) + "\n")
+    async def _save_single_result(self, result: ModelResult) -> None:
+        """Save a single model result immediately."""
+        if self.context.dry_run:
+            return
 
-        # Save individual result files
+        # Save individual result file
         results_dir = self.context.get_results_dir()
-        for result in self.results:
-            result_path = results_dir / f"{sanitize_filename(result.model)}.json"
-            save_json_safely(result.to_dict(), result_path)
+        result_path = results_dir / f"{sanitize_filename(result.model)}.json"
+        save_json_safely(result.to_dict(), result_path)
+
+        # Append to results JSONL file
+        results_path = self.context.output_dir / RESULTS_JSONL_FILE
+        with results_path.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(result.to_dict()) + "\n")
+
+        # Print immediate completion notice
+        if not self.context.quiet:
+            status_icon = "✅" if result.status == "ok" else "❌"
+            self.console.print(f"{status_icon} [cyan]{result.model}[/cyan] completed - result saved")
+
+    async def _save_final_artifacts(self) -> None:
+        """Save final artifacts after all models complete."""
+        # Save manifest (contains run info and command used)
+        manifest_path = self.context.output_dir / MANIFEST_FILE
+        save_json_safely(self.context.manifest.to_dict(), manifest_path)
 
     def print_summary(self) -> None:
         """Print execution summary."""

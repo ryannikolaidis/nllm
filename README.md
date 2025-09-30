@@ -5,7 +5,7 @@ Multi-model fan-out wrapper for the `llm` CLI tool. Execute the same prompt acro
 ## Features
 
 - **Multi-model execution** - Run prompts across multiple AI models simultaneously
-- **Streaming output** - Real-time console feedback with model-tagged output
+- **Streaming output** - Real-time console feedback with model-tagged output and immediate result writing
 - **Flexible configuration** - CLI arguments or YAML config files with per-model options
 - **JSON extraction** - Automatically detect and parse JSON responses from model outputs
 - **Structured artifacts** - JSON/JSONL output with complete run metadata
@@ -289,7 +289,7 @@ The analysis shows: {"confidence": 0.95, "prediction": "positive"}
 
 ## Output Structure
 
-Each nllm run creates a timestamped directory with structured output:
+nllm creates a timestamped directory immediately when execution starts and writes results incrementally as each model completes. This provides immediate feedback and allows accessing partial results during long-running executions:
 
 ```
 ./nllm-runs/2023-01-01_12-30-45/
@@ -342,6 +342,17 @@ Each line in `results.jsonl` and individual result files:
   "json": null
 }
 ```
+
+### Streaming Result Writing
+
+nllm writes results incrementally for immediate feedback:
+
+1. **Immediate setup**: Output directory and command information are written as soon as execution starts
+2. **Per-model completion**: Each model's results are saved immediately when that model finishes
+3. **Visual feedback**: Console shows ✅/❌ completion indicators as models finish
+4. **Parallel access**: Results can be accessed while other models are still running
+
+This allows monitoring progress and accessing results during long-running multi-model executions.
 
 With JSON extraction:
 

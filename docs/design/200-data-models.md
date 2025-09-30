@@ -284,7 +284,7 @@ class ExecutionContext:
 ```
 
 ### Results JSONL Schema
-Each line in `results.jsonl` follows this schema:
+nllm appends to `results.jsonl` immediately as each model completes. Each line follows this schema:
 
 ```json
 {
@@ -392,15 +392,14 @@ manifest_dict = manifest.to_dict()
 
 ### JSON File Generation
 ```python
-# Save manifest
+# Save manifest (written immediately at start, updated at end)
 manifest_path = output_dir / "manifest.json"
 save_json_safely(manifest.to_dict(), manifest_path)
 
-# Save results JSONL
+# Save results JSONL (appended per model completion)
 results_path = output_dir / "results.jsonl"
-with results_path.open("w", encoding="utf-8") as f:
-    for result in results:
-        f.write(json.dumps(result.to_dict()) + "\n")
+with results_path.open("a", encoding="utf-8") as f:
+    f.write(json.dumps(result.to_dict()) + "\n")
 ```
 
 ## Validation and Error Handling
