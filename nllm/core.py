@@ -84,10 +84,13 @@ class ModelExecutor:
 
     def _create_dry_run_result(self) -> ModelResult:
         """Create a result for dry run mode."""
-        command = construct_llm_command(
+        command, stdin_input = construct_llm_command(
             self.model_config.name, self.context.llm_args, self.model_config.options
         )
         command_str = " ".join(redact_secrets_from_args(command))
+
+        if stdin_input:
+            command_str += " (with stdin input)"
 
         if not self.context.quiet:
             self.console.print(f"{DRY_RUN_PREFIX} [{self.model}] {command_str}")
@@ -104,7 +107,7 @@ class ModelExecutor:
 
     async def _run_model(self) -> ModelResult:
         """Run the actual model execution."""
-        command = construct_llm_command(
+        command, stdin_input = construct_llm_command(
             self.model_config.name, self.context.llm_args, self.model_config.options
         )
 
@@ -112,6 +115,7 @@ class ModelExecutor:
         try:
             process = await asyncio.create_subprocess_exec(
                 *command,
+                stdin=asyncio.subprocess.PIPE if stdin_input else None,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
                 cwd=Path.cwd(),
@@ -128,6 +132,12 @@ class ModelExecutor:
             stderr_file = stderr_path.open("w", encoding="utf-8")
 
         try:
+            # Write stdin if needed
+            if stdin_input and process.stdin:
+                process.stdin.write(stdin_input.encode('utf-8'))
+                await process.stdin.drain()
+                process.stdin.close()
+
             # Run with timeout (if specified)
             if self.context.config.timeout is not None:
                 stdout_data, stderr_data = await asyncio.wait_for(
@@ -245,7 +255,7 @@ class ModelExecutor:
     def _create_timeout_result(self) -> ModelResult:
         """Create result for timeout case."""
         duration_ms = int((self.end_time or time.time()) - (self.start_time or 0)) * 1000
-        command = construct_llm_command(
+        command, _ = construct_llm_command(
             self.model_config.name, self.context.llm_args, self.model_config.options
         )
 
@@ -263,7 +273,7 @@ class ModelExecutor:
     def _create_error_result(self, error_message: str) -> ModelResult:
         """Create result for error case."""
         duration_ms = int((self.end_time or time.time()) - (self.start_time or 0)) * 1000
-        command = construct_llm_command(
+        command, _ = construct_llm_command(
             self.model_config.name, self.context.llm_args, self.model_config.options
         )
 

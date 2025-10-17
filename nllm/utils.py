@@ -116,8 +116,14 @@ def create_timestamped_dir(base_dir: str) -> Path:
 
 def construct_llm_command(
     model: str, llm_args: list[str], model_options: list[str] | None = None
-) -> list[str]:
-    """Construct llm command for a specific model with per-model options."""
+) -> tuple[list[str], str | None]:
+    """Construct llm command for a specific model with per-model options.
+
+    Returns:
+        tuple: (command list, stdin_input or None)
+            - If stdin_input is not None, pass it to the process via stdin
+            - Otherwise, the command contains all arguments
+    """
     command = ["llm"]
 
     # If model is already specified in llm_args, don't add it again
@@ -134,8 +140,16 @@ def construct_llm_command(
     if model_options:
         command.extend(model_options)
 
-    command.extend(llm_args)
-    return command
+    # Always pass prompt via stdin to avoid argument list too long errors
+    stdin_input = None
+    if len(llm_args) == 1:
+        # Single argument is the prompt - pass via stdin
+        stdin_input = llm_args[0]
+    else:
+        # Multiple arguments - keep as command-line args
+        command.extend(llm_args)
+
+    return command, stdin_input
 
 
 def sanitize_filename(name: str) -> str:

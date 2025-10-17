@@ -145,29 +145,33 @@ class TestConstructLlmCommand:
 
     def test_basic_command_construction(self):
         """Test basic command construction without existing model."""
-        command = construct_llm_command("gpt-4", ["prompt text"])
-        assert command == ["llm", "-m", "gpt-4", "prompt text"]
+        command, stdin_input = construct_llm_command("gpt-4", ["prompt text"])
+        assert command == ["llm", "-m", "gpt-4"]
+        assert stdin_input == "prompt text"
 
     def test_command_with_existing_model(self):
         """Test command construction when model already specified."""
         llm_args = ["-m", "claude-3-sonnet", "prompt text"]
-        command = construct_llm_command("gpt-4", llm_args)
-        # Should not add another -m flag
+        command, stdin_input = construct_llm_command("gpt-4", llm_args)
+        # Should not add another -m flag, but should pass via command line since multiple args
         assert command == ["llm", "-m", "claude-3-sonnet", "prompt text"]
+        assert stdin_input is None
 
     def test_command_with_long_model_flag(self):
         """Test command construction with --model flag."""
         llm_args = ["--model", "claude-3-sonnet", "prompt text"]
-        command = construct_llm_command("gpt-4", llm_args)
-        # Should not add another model flag
+        command, stdin_input = construct_llm_command("gpt-4", llm_args)
+        # Should not add another model flag, multiple args via command line
         assert command == ["llm", "--model", "claude-3-sonnet", "prompt text"]
+        assert stdin_input is None
 
     def test_command_with_other_flags(self):
         """Test command construction with other flags."""
         llm_args = ["-t", "0.7", "--system", "You are helpful", "prompt text"]
-        command = construct_llm_command("gpt-4", llm_args)
+        command, stdin_input = construct_llm_command("gpt-4", llm_args)
         expected = ["llm", "-m", "gpt-4", "-t", "0.7", "--system", "You are helpful", "prompt text"]
         assert command == expected
+        assert stdin_input is None
 
 
 class TestSanitizeFilename:
